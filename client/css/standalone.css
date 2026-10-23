@@ -1,0 +1,108 @@
+/* TU Darmstadt-inspired local client. Shared by real and demo mailboxes. */
+:root{
+ --navy:#b90f22;--navy-dark:#8a0b19;--navy-tint:#faedef;
+ --emerald:#b90f22;--emerald-dark:#8a0b19;--emerald-tint:#faedef;
+ --bg:#f7f7f7;--bg-2:#ededed;--surface:#fff;--border:#ddd;
+ --text:#252525;--text-muted:#626262;--text-faint:#767676;
+ --radius-sm:2px;--radius:2px;--radius-lg:3px;
+ --font:Arial,Helvetica,sans-serif;--font-display:Georgia,'Times New Roman',serif;
+ --shadow-sm:0 1px 2px #00000008;--shadow:0 3px 14px #0000000d;--shadow-lg:0 12px 38px #00000024;
+}
+body{background:#fff}
+button,input,select,textarea{font-family:var(--font)}
+h1,h2,h3,h4{letter-spacing:normal;text-transform:none}
+.app-shell{display:block;min-height:100vh}
+.main-content.mail-main{margin-left:0;width:100%;padding:0;height:100vh;height:100dvh}
+.mail-main .page-title{min-height:98px;padding:10px 28px;background:#fff;border-bottom:5px solid var(--navy);backdrop-filter:none;flex-wrap:nowrap;gap:16px}
+.page-title-left{gap:26px;flex:1;min-width:0}
+.tu-header-logo{display:block;width:190px;height:74px;object-fit:contain;flex-shrink:0}
+.page-title h2{font:400 26px/1.2 var(--font-display);text-transform:none;letter-spacing:normal;margin:0;color:#252525}
+.profile-menu{display:flex;align-items:center;gap:16px;flex-shrink:0}
+.profile-menu>span{font-size:12px;color:#626262;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.profile-menu .btn{background:#fff;color:#333;border:1px solid #aaa;font-weight:400;font-size:13px;padding:8px 13px;box-shadow:none}
+.mail-app{border-top:0}
+.mail-folders{background:#f7f7f7}
+.mail-folders-head{padding:22px 16px 18px}
+.mail-folder-list{padding:12px 8px}
+.mail-folder{border-radius:0;border-left:3px solid transparent;min-height:42px}
+.mail-folder.active{border-left-color:var(--navy);background:#faedef;color:#8a0b19}
+.mail-folder:hover{background:#eee}
+.mail-folder.active:hover{background:#f6e1e4}
+.mail-signature-link{border-radius:0;color:#555}
+.mail-list-title-row h3{font-family:var(--font-display);font-weight:400;text-transform:none;letter-spacing:normal}
+.mail-search input{border:1px solid #bbb;border-radius:0;background:#fff}
+.mail-chip{border-radius:2px;background:#fff;color:#555}
+.mail-chip.active{border-color:var(--navy);color:var(--navy);background:#fff}
+.mail-item:hover{background:#f7f7f7}
+.mail-item.selected{background:#faedef}
+.mail-item.unread .subject{color:#252525}
+.mail-item .avatar,.card-avatar{background:#f1e8e9!important;color:#8a0b19!important;border-radius:3px}
+.mail-list-head,.msg-toolbar,.msg-scroll,.mail-read-empty{background:#f7f7f7}
+.msg-toolbar{border-bottom:1px solid #ddd}
+.thread-head{padding:24px 24px 8px}
+.msg-subject{font-family:var(--font-display);font-weight:400;letter-spacing:normal;text-transform:none}
+.thread{padding:8px 22px 28px;gap:16px}
+.msg-card{border:1px solid #d9d9d9;border-radius:2px;box-shadow:none}
+.card-head-collapsed:hover{background:#f7f7f7}
+.card-head{padding:18px 20px 10px}
+.btn-primary,.mail-compose-btn,.cmp-send,.mail-fab{background:var(--navy);border-color:var(--navy);color:#fff;box-shadow:none}
+.btn-primary:hover:not(:disabled),.mail-compose-btn:hover,.cmp-send:hover{background:var(--navy-dark);color:#fff}
+.mail-fab{border-radius:3px;bottom:24px}
+.cmp-window,.cmp-dialog,.mail-card{border-radius:3px;border:1px solid #ccc}
+.cmp-head{background:#fff;border-top:4px solid var(--navy);padding:14px 18px}
+.cmp-head h3,.cmp-dialog h3{font:400 21px/1.3 var(--font-display)}
+.cmp-toolbar,.cmp-foot{background:#f7f7f7}
+.cmp-toolbar button,.cmp-toolbar select,.cmp-att,.sig-toolbar,.sig-editor-wrap{border-radius:2px}
+.cmp-dialog-overlay,.cmp-overlay{background:rgba(0,0,0,.4)}
+.mail-popup,.popup-menu{border-radius:2px}
+.tu-toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#303030;color:#fff;padding:13px 20px;border-radius:2px;z-index:20000;box-shadow:var(--shadow);max-width:calc(100% - 32px)}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--navy);outline-offset:3px}
+@media(min-width:1360px){.mail-app{grid-template-columns:230px 370px minmax(0,1fr)}}
+@media(max-width:899px){
+ .mail-main .page-title{min-height:74px;padding:8px 14px;gap:8px;border-bottom-width:4px}
+ .page-title-left{gap:10px}.tu-header-logo{width:112px;height:50px}
+ .page-title h2{font-size:20px}.profile-menu>span{display:none}
+ .profile-menu .btn{font-size:12px;padding:7px 9px}
+ .main-content.mail-main{padding-bottom:0!important}
+ .thread-head{padding:18px 14px 6px}.thread{padding:6px 10px 18px}
+ .card-head{padding:14px 12px 8px}.cmp-window{border:0;border-radius:0}
+}
+@media(max-width:420px){.tu-header-logo{width:84px;height:44px}.page-title-left{gap:6px}.page-title h2{font-size:18px}.mail-main .page-title{padding:8px}.profile-menu .btn{padding:6px;font-size:11px}}
+
+/* Quiet mailbox header; background syncing stays out of the interface. */
+#mail-sync { display: none !important; }
+.mail-main .page-title { min-height: 66px; padding: 7px 20px; gap: 12px; border-bottom-width: 2px; }
+.tu-header-logo { width: 140px; height: 50px; }
+.page-title-left { gap: 12px; }
+.page-title .wide-title, .profile-menu > span, #tools-menu { display: none; }
+.profile-menu { gap: 0; }
+.profile-menu .btn { border: 0; background: transparent; padding: 8px; color: #626262; font-size: 12px; }
+.profile-menu .btn:hover { background: #f3f3f3; color: #252525; }
+@media (max-width: 899px) {
+  .mail-main .page-title { min-height: 54px; padding: 6px 12px; gap: 8px; }
+  .tu-header-logo { display: none; }
+  .page-title-left { gap: 8px; }
+  .page-title h2 { font: 400 20px/1.2 var(--font-display); }
+}
+
+/* Only an explicit sync action may reveal progress. */
+#mail-sync[data-manual="true"]:not([hidden]) { display:block !important; }
+.mail-main .page-title-left { min-width:0; }
+@media(max-width:899px){
+ .tu-header-logo { display:block; width:100px; height:42px; }
+ .mail-main .page-title { min-height:58px; gap:6px; }
+ .page-title-left { gap:8px; }
+ .page-title h2 { font-size:17px; min-width:0; }
+ .page-title h2 .unread-pill { display:none; }
+}
+@media(max-width:420px){
+ .tu-header-logo { width:86px; height:38px; }
+ .page-title-left { gap:5px; }
+ .page-title h2 { font-size:16px; }
+ .mail-main .page-title { padding:6px 8px; }
+}
+
+.account-menu{position:relative;font:13px Arial,sans-serif}.account-menu summary{cursor:pointer;padding:8px;color:#555;list-style:none}.account-menu summary::after{content:' ▾'}
+.account-panel{position:absolute;right:0;top:100%;min-width:240px;max-width:85vw;background:#fff;border:1px solid #ddd;box-shadow:0 6px 22px #0002;padding:12px;z-index:90}.account-panel strong{display:block;overflow-wrap:anywhere;padding:8px;font-size:12px}.account-panel button{display:block;width:100%;text-align:left;border:0;background:#fff;padding:10px;cursor:pointer;color:#333}.account-panel button:hover{background:#faedef}
+.mail-extra-tools{padding:8px 12px;border-top:1px solid #ddd}.mail-extra-tools button{display:block;background:none;border:0;padding:9px 10px;color:#555;cursor:pointer;font:14px Arial}
+.mail-utility-dialog{width:min(640px,calc(100% - 28px));max-height:85vh;overflow:auto;padding:24px;border:1px solid #ccc;border-top:4px solid #b90f22;color:#252525}.mail-utility-dialog::backdrop{background:#0006}.mail-utility-dialog h2{font:24px Georgia;margin:0 0 18px}.mail-utility-dialog p{white-space:pre-wrap;overflow-wrap:anywhere}.mail-utility-dialog input{padding:9px;margin:5px 0;border:1px solid #aaa;width:100%}.mail-utility-dialog button{padding:8px 12px;margin:4px;border:1px solid #ccc;background:#fff;color:#8a0b19;cursor:pointer}.mail-utility-dialog a{display:block;color:#b90f22;margin:12px 0}.contact-row{display:flex;flex-wrap:wrap;align-items:center;gap:5px;border-bottom:1px solid #eee;padding:8px 0}.contact-row span{flex:1 1 180px;overflow-wrap:anywhere}.mail-utility-dialog form{margin-bottom:20px}

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TU Mail — Sign in</title>
+  <link rel="stylesheet" href="css/login.css">
+</head>
+<body>
+  <header class="site-header">
+    <img class="university-logo" src="assets/tu-logo.svg" alt="Technische Universität Darmstadt" width="220" height="90">
+    <span class="service-name">TU Mail</span>
+  </header>
+  <main>
+    <form id="login">
+      <h1>Webmail</h1>
+      <p class="intro">Sign in with your university account.</p>
+      <label for="profile">Mailbox type</label>
+      <select id="profile" name="profile"><option value="student">Student</option><option value="staff">Staff / Groupware</option><option value="linux">Staff / Linux mailbox</option></select>
+      <label for="email">Email address</label>
+      <input id="email" name="email" type="email" autocomplete="email" spellcheck="false" autocapitalize="none" required>
+      <label for="username">TU-ID</label>
+      <input id="username" name="username" autocomplete="username" spellcheck="false" autocapitalize="none" required>
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+      <p id="error" role="alert" aria-live="polite"></p>
+      <button id="submit" type="submit">Sign in</button>
+      <a class="help" href="https://www.hrz.tu-darmstadt.de/support_und_anleitungen/hrz_anleitungen/linux_mailbox/e_mail_einrichten/index.en.jsp" target="_blank" rel="noopener noreferrer">Login help ↗</a>
+    </form>
+  </main>
+  <footer>Independent local mail client · Not an official TU Darmstadt service</footer>
+  <script src="js/login.js"></script>
+</body>
+</html>
+

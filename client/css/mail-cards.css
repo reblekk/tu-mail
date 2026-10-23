@@ -1,0 +1,278 @@
+/* Conversation cards, pop-up menus, the Undo bar, selection + bulk bar, folder options. Loaded after mail.css. */
+
+/* ---------- the reading pane as a stack of cards ---------- */
+.msg-scroll { background: #eef1f6; }
+.thread-head { padding: 18px 20px 4px; }
+.thread-head .msg-subject { margin: 0 0 6px; }
+.thread-meta { display: flex; align-items: center; gap: 12px; font-size: 12.5px; color: var(--text-muted); margin-bottom: 4px; }
+.card-link { border: 0; background: none; color: var(--navy); font-size: 12.5px; font-weight: 600; padding: 0; cursor: pointer; }
+.card-link:hover { text-decoration: underline; }
+.thread { padding: 8px 14px 28px; display: flex; flex-direction: column; gap: 12px; }
+
+.msg-card {
+  background: var(--surface);
+  border: 1px solid #e3e7ef;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(20, 30, 60, .06), 0 6px 18px -12px rgba(20, 30, 60, .18);
+  overflow: hidden;
+}
+.msg-card.unread { border-left: 3px solid var(--navy); }
+.card-head {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+  padding: 16px 18px 6px;
+}
+.card-head-collapsed { cursor: pointer; padding-bottom: 14px; align-items: center; }
+.card-head-collapsed:hover { background: #fafbfd; }
+.card-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 700;
+}
+.card-who { min-width: 0; padding-top: 1px; }
+.card-name { font-size: 13.5px; color: var(--text); overflow-wrap: anywhere; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 1px; }
+.card-name .nm { font-weight: 700; }
+.card-name .ad { color: var(--text-muted); font-weight: 400; font-size: 12.5px; }
+.card-flag { color: var(--danger); margin-left: 6px; display: inline-flex; }
+.card-flag svg { width: 13px; height: 13px; fill: var(--danger); }
+.card-to { font-size: 12.5px; color: var(--text-muted); margin-top: 2px; }
+.card-to span { color: var(--text); }
+.card-to .card-link { margin-left: 8px; }
+.card-snippet { font-size: 12.5px; color: var(--text-muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card-date { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+.card-date-inline { display: none; }
+.card-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.card-action-row { display: flex; align-items: center; gap: 2px; }
+.card-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font: 600 12.5px var(--font);
+  padding: 5px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.card-action:hover { background: var(--bg-2); color: var(--text); }
+.card-action.reply svg { color: #8e3fa8; }
+.card-action.replyall svg { color: #b13a96; }
+.card-action.forward svg { color: #2b7de0; }
+.card-divider { width: 1px; height: 18px; background: var(--border); margin: 0 4px; }
+.card-more { border: 0; background: transparent; color: var(--text-muted); width: 30px; height: 30px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.card-more:hover { background: var(--bg-2); color: var(--text); }
+.card-more svg { fill: currentColor; stroke: none; }
+
+.card-details { margin: 4px 18px 0 68px; padding: 10px 12px; background: var(--bg); border-radius: var(--radius-sm); font-size: 12.5px; line-height: 1.6; color: var(--text-muted); overflow-wrap: anywhere; }
+.card-details[hidden] { display: none; }
+.card-details b { color: var(--text); font-weight: 600; display: inline-block; min-width: 64px; }
+.msg-card .msg-attachments { padding: 8px 18px 0 68px; }
+.msg-card .card-banner { margin: 10px 18px 0 68px; }
+.card-body { padding: 8px 22px 6px 68px; }
+.card-foot { display: flex; gap: 8px; padding: 6px 18px 16px 68px; }
+.card-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #d9dde6;
+  background: #fff;
+  color: var(--text);
+  font: 600 13px var(--font);
+  padding: 7px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.card-btn:hover { background: var(--bg); }
+.card-btn:first-child svg { color: #8e3fa8; }
+.card-btn:last-child svg { color: #2b7de0; }
+
+/* Toolbar labels give way to icons when the reading pane is narrow. */
+.mail-read-pane { container: reader / inline-size; }
+@container reader (max-width: 640px) {
+  .msg-toolbar .mail-tool .label { display: none; }
+  .msg-toolbar .mail-tool { padding: 7px 8px; }
+}
+
+/* The header adapts to the width of the CARD (not the screen): the reading pane can be narrow on
+   a laptop with the list open, and wide on a phone. */
+.msg-card { container: card / inline-size; }
+@container card (max-width: 640px) {
+  .card-action span { display: none; }
+  .card-action { padding: 6px; }
+  .card-actions .card-date { display: none; }
+  .card-date-inline { display: block; margin-top: 2px; }
+  .card-head { padding: 14px 12px 4px; gap: 10px; }
+  .card-details { margin-left: 12px; margin-right: 12px; }
+  .msg-card .msg-attachments { padding: 8px 12px 0; }
+  .msg-card .card-banner { margin-left: 12px; margin-right: 12px; }
+  .card-body { padding: 6px 14px 4px; }
+  .card-foot { padding: 6px 12px 14px; }
+  .card-btn { flex: 1; justify-content: center; }
+}
+@container card (max-width: 440px) {
+  .card-head { grid-template-columns: 38px minmax(0, 1fr); }
+  .card-actions { grid-column: 1 / -1; align-items: stretch; }
+  .card-action-row { justify-content: flex-end; border-top: 1px solid var(--border); padding-top: 6px; margin-top: 2px; }
+  .card-head-collapsed { grid-template-columns: 38px minmax(0, 1fr); }
+  .card-head-collapsed .card-date { grid-column: 2; }
+}
+
+@media (max-width: 899px) {
+  .thread-head { padding: 14px 14px 2px; }
+  .thread { padding: 6px 10px 100px; gap: 10px; }
+  .msg-scroll { padding-bottom: 0; }
+}
+
+/* ---------- pop-up menu ---------- */
+.mail-menu {
+  position: fixed;
+  z-index: 90;
+  min-width: 190px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  padding: 5px;
+}
+.mail-menu-item { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 9px 12px; border-radius: 6px; font: 500 13.5px var(--font); color: var(--text); cursor: pointer; }
+.mail-menu-item:hover { background: var(--navy-tint); }
+.mail-menu-item.danger { color: var(--danger); }
+.mail-menu-item.danger:hover { background: var(--danger-tint); }
+.mail-menu-sep { height: 1px; background: var(--border); margin: 4px 6px; }
+
+/* ---------- undo bar ---------- */
+.mail-snack {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translate(-50%, 24px);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 95;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #1b2430;
+  color: #fff;
+  padding: 11px 16px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  box-shadow: var(--shadow-lg);
+  transition: opacity .18s ease, transform .18s ease;
+  max-width: calc(100vw - 24px);
+}
+.mail-snack.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+.mail-snack button { border: 0; background: none; color: #8fb4ff; font: 700 13.5px var(--font); cursor: pointer; padding: 0; }
+@media (max-width: 899px) { .mail-snack { bottom: 100px; } }
+
+/* ---------- folder picker (inside the shared dialog) ---------- */
+.pick-list { max-height: 50vh; overflow-y: auto; margin: 0 -8px 12px; }
+.pick-row { display: flex; align-items: center; gap: 10px; width: 100%; border: 0; background: none; padding: 9px 12px; border-radius: 6px; font: 500 14px var(--font); color: var(--text); cursor: pointer; text-align: left; }
+.pick-row:hover { background: var(--navy-tint); }
+.pick-row svg { width: 17px; height: 17px; color: var(--text-muted); flex-shrink: 0; }
+.pick-new { color: var(--navy); font-weight: 700; border-top: 1px solid var(--border); border-radius: 0; margin-top: 6px; padding-top: 12px; }
+
+/* ---------- folders: heading, options button ---------- */
+.mail-folders-title { display: flex; align-items: center; justify-content: space-between; padding: 8px 8px 0 18px; font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-faint); }
+.mail-folders-title .mail-icon-btn { width: 28px; height: 28px; }
+.mail-folder { position: relative; }
+.folder-more { border: 0; background: none; color: var(--text-muted); width: 26px; height: 26px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0; flex-shrink: 0; }
+.folder-more svg { width: 16px; height: 16px; }
+.mail-folder:hover .folder-more, .folder-more:focus-visible { opacity: 1; }
+.folder-more:hover { background: rgba(30, 69, 147, .12); color: var(--navy); }
+@media (hover: none) { .folder-more { opacity: .8; } }
+
+/* ---------- selecting several messages ---------- */
+.mail-av-wrap { position: relative; width: 40px; height: 40px; flex-shrink: 0; }
+.sel-box {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid #b8c0d0;
+  color: transparent;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.sel-box svg { width: 18px; height: 18px; }
+.mail-app.selecting .sel-box { display: flex; }
+.mail-item.picked { background: var(--navy-tint); }
+.mail-item.picked .sel-box { display: flex; background: var(--navy); border-color: var(--navy); color: #fff; }
+.chip-select.active { background: var(--navy); color: #fff; }
+
+.mail-bulk { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 8px; padding: 6px 8px; background: var(--navy-tint); border-radius: var(--radius); }
+.mail-bulk[hidden] { display: none; }
+.bulk-all { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--navy-dark); cursor: pointer; margin-right: auto; }
+.bulk-all input { width: auto; margin: 0; }
+.bulk-actions { display: flex; gap: 0; flex-wrap: wrap; }
+.bulk-actions .mail-icon-btn { width: 32px; height: 32px; color: var(--navy-dark); }
+.bulk-actions .mail-icon-btn:disabled { opacity: .35; cursor: default; }
+
+.draft-tag { display: inline-block; margin-right: 6px; padding: 0 6px; border-radius: 4px; background: var(--danger-tint); color: #b3282d; font-size: 11px; font-weight: 800; letter-spacing: .03em; text-transform: uppercase; }
+.mail-item.picked .from, .mail-item.picked .subject { color: var(--navy-dark); }
+
+.thread-count { min-width: 18px; padding: 0 6px; border-radius: 9px; background: var(--navy-tint); color: var(--navy); font-size: 11px; font-weight: 700; line-height: 18px; text-align: center; }
+
+/* Reply / Forward only on the newest message of a chain (the ••• menu still has them for the rest). */
+.msg-card:not(.latest) .card-action.reply,
+.msg-card:not(.latest) .card-action.replyall,
+.msg-card:not(.latest) .card-action.forward,
+.msg-card:not(.latest) .card-divider,
+.msg-card:not(.latest) .card-foot { display: none; }
+
+/* A message still being sent */
+.msg-card.pending { opacity: .55; pointer-events: none; }
+.msg-card.pending .card-action-row { visibility: hidden; }
+.msg-card.pending .card-foot { display: none; }
+.msg-card.pending .card-date::before { content: "Sending… "; font-style: italic; }
+.mail-item.sending { opacity: .55; }
+.mail-item.sending .date { font-style: italic; }
+
+/* Background sync progress under the list filters */
+.mail-sync { margin-top: 8px; font-size: 12px; color: var(--text-faint); }
+.mail-sync[hidden] { display: none; }
+.mail-sync-text { display: flex; justify-content: space-between; margin-bottom: 4px; }
+.mail-sync-text b { color: var(--navy); font-weight: 700; }
+.mail-sync-bar { height: 4px; border-radius: 2px; background: var(--navy-tint); overflow: hidden; }
+.mail-sync-bar i { display: block; height: 100%; width: 0; background: var(--emerald); transition: width .3s ease; }
+.mail-sync.done { color: var(--emerald-dark, #0c7a4d); }
+
+/* Cards without the Reply/Forward row (older messages, one still sending) keep the bottom breathing room. */
+.msg-card:not(.latest) .card-body,
+.msg-card.pending .card-body { padding-bottom: 18px; }
+@media (max-width: 899px) {
+  .msg-card:not(.latest) .card-body,
+  .msg-card.pending .card-body { padding-bottom: 16px; }
+}
+
+/* Attachment previews */
+.msg-attachment .fview { margin-left: 4px; padding: 1px 7px; border-radius: 999px; background: var(--navy-tint); color: var(--navy); font-size: 11px; font-weight: 700; }
+.msg-attachment.previewable { cursor: zoom-in; }
+.att-viewer { position: fixed; inset: 0; z-index: 130; display: flex; flex-direction: column; background: rgba(12, 18, 36, .97); }
+.att-viewer[hidden] { display: none; }
+.att-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; color: #fff; }
+.att-title { min-width: 0; display: flex; flex-direction: column; }
+.att-name { font-weight: 700; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.att-meta { font-size: 12px; opacity: .7; }
+.att-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.att-nav, .att-close { width: 36px; height: 36px; border: 0; border-radius: 10px; background: rgba(255, 255, 255, .12); color: #fff; font-size: 20px; line-height: 1; cursor: pointer; }
+.att-nav:hover, .att-close:hover { background: rgba(255, 255, 255, .22); }
+.att-nav[hidden] { display: none; }
+.att-stage { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 0 14px 14px; overflow: auto; }
+.att-stage img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 6px; background: #fff; box-shadow: 0 10px 40px rgba(0, 0, 0, .4); }
+.att-pdf { width: min(1100px, 100%); height: 100%; border: 0; border-radius: 6px; background: #fff; }
+.att-text { width: min(900px, 100%); max-height: 100%; margin: 0; padding: 16px; overflow: auto; border-radius: 6px; background: #fff; color: #1b2233; font: 13px/1.5 ui-monospace, Menlo, Consolas, monospace; white-space: pre-wrap; word-break: break-word; }
+.att-note { color: #fff; text-align: center; font-size: 14px; }
+.att-note p { margin: 6px 0; }
+.att-open { overflow: hidden; }
+@media (max-width: 899px) { .att-bar { padding: 8px 10px; } .att-stage { padding: 0 8px 8px; } }

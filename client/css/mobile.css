@@ -1,0 +1,288 @@
+/* Mobile-specific overrides: home.html, add.html, detail.html */
+
+.bulk-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--navy-tint);
+  border: 1px solid var(--border);
+}
+.bulk-bar[hidden] {
+  display: none;
+}
+.bulk-bar .count {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.shipment-list {
+  padding: 0;
+}
+.shipment-item {
+  padding: 12px;
+  margin-bottom: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.item-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  /* The meta line (date · type · tracking code · cost) can get long enough to squeeze the
+     action icons off a narrow phone screen — wrapping lets it drop to its own line instead. */
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+.item-actions .btn-icon {
+  padding: 6px;
+  color: var(--text-faint);
+}
+.item-actions .btn-icon:hover {
+  color: var(--navy);
+  background: var(--navy-tint);
+}
+.shipment-item .checkbox {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+.shipment-item .thumb {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  background: var(--bg);
+  flex-shrink: 0;
+  cursor: zoom-in;
+}
+.shipment-item .info {
+  flex: 1;
+  min-width: 0;
+}
+/* .info's min-width:0 only lets IT shrink — when it's wrapped in another flex container (e.g.
+   Finance's checkbox + .info row), that wrapper is still sized to its content's natural min
+   width by default, which pushes the whole row wider than the card and forces horizontal
+   overflow instead of letting the ellipsis below ever kick in. */
+.shipment-item .flex-between > .flex {
+  min-width: 0;
+}
+.shipment-item .customer {
+  font-weight: 700;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.shipment-item .supplier {
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.shipment-item .weight {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--navy);
+  flex-shrink: 0;
+}
+
+/* 4-step add form */
+.form-steps {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0 0 24px;
+}
+.form-step {
+  display: none;
+}
+.form-step.active {
+  display: block;
+}
+.step-nav {
+  display: flex;
+  gap: 10px;
+  max-width: 480px;
+  margin: 28px auto 0;
+}
+.step-nav .btn {
+  flex: 1;
+}
+@media (max-width: 899px) {
+  /* Narrow screens can't fit the meta line (date · type · tracking code · cost) alongside all
+     four action icons, and letting it wrap naturally strands a single icon up on the text's row.
+     Giving the text its own full row keeps the icons grouped together underneath it. */
+  /* Direct-child only — a descendant selector here previously also matched spans nested inside
+     child buttons (e.g. an icon/label span in a toggle), stretching them to full width instead
+     of leaving only this row's own meta text to wrap. */
+  .item-actions > span {
+    flex: 1 0 100%;
+  }
+  .form-steps {
+    padding-bottom: 150px;
+  }
+  .step-nav {
+    position: fixed;
+    /* Sits just above the floating bottom navigation. */
+    bottom: 86px;
+    left: 0;
+    right: 0;
+    padding: 12px 16px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    max-width: none;
+    margin: 0;
+  }
+}
+
+.scanner-box {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-top: 12px;
+}
+.scanner-box[hidden] {
+  display: none;
+}
+#qr-reader {
+  width: 100%;
+}
+
+.photo-upload {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  margin-bottom: 12px;
+}
+.photo-upload .preview {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  background: var(--bg);
+  flex-shrink: 0;
+}
+.photo-upload label {
+  flex: 1;
+}
+.photo-upload .file-name {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Shipment detail */
+.detail-actions-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.detail-actions-bar .btn {
+  flex: 1;
+  min-width: 140px;
+}
+
+.detail-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+@media (min-width: 900px) {
+  .detail-layout {
+    grid-template-columns: 320px 1fr;
+    align-items: start;
+  }
+}
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+@media (min-width: 900px) {
+  .photo-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.photo-slot {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+.photo-slot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  cursor: zoom-in;
+}
+.photo-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-faint);
+  font-size: 12px;
+  text-align: center;
+  padding: 4px;
+}
+.photo-change-overlay {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: rgba(20, 30, 60, 0.78);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.photo-change-overlay:hover {
+  background: var(--navy);
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+}
+.detail-row:last-child {
+  border-bottom: none;
+}
+.detail-row .label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.detail-row .value {
+  font-size: 14px;
+  text-align: right;
+}
+.detail-row input,
+.detail-row select {
+  text-align: right;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-size: 14px;
+  font-family: inherit;
+  width: 60%;
+}

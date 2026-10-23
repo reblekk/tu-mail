@@ -1,0 +1,885 @@
+/* Dashboard + admin pages: sidebar layout, stat cards, charts */
+
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: var(--navy);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  z-index: 40;
+  transition: transform 0.2s ease;
+}
+.sidebar .brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+.sidebar .brand img {
+  height: 28px;
+}
+.sidebar .brand span {
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+}
+.sidebar nav {
+  flex: 1;
+  padding: 12px;
+}
+.sidebar nav a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border-radius: var(--radius-sm);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.sidebar nav a svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.sidebar nav a:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+.sidebar nav a.active {
+  background: var(--emerald);
+  color: #06301f;
+}
+/* ==========================================================================
+   Profile menu — cog icon in the top-right of every page, replaces the old
+   sidebar name/role/logout block
+   ========================================================================== */
+.profile-menu {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+.profile-identity {
+  min-width: 0;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 4px 7px 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
+}
+.profile-identity:hover {
+  border-color: rgba(30, 69, 147, .35);
+  background: var(--navy-tint);
+  box-shadow: 0 4px 12px rgba(20, 30, 60, .08);
+}
+.profile-identity:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
+}
+.profile-identity-copy {
+  min-width: 0;
+  max-width: 190px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.15;
+}
+.profile-identity-name,
+.profile-identity-role {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.profile-identity-name {
+  font-size: 12.5px;
+  font-weight: 750;
+  color: var(--text);
+}
+.profile-identity-role {
+  margin-top: 3px;
+  font-size: 10px;
+  font-weight: 550;
+  color: var(--text-muted);
+}
+.profile-identity > svg {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  padding: 7px;
+  border-radius: 50%;
+  background: var(--navy-tint);
+  color: var(--navy);
+}
+.profile-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 180px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  padding: 14px;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+/* Author styles beat the browser's built-in [hidden] rule even at equal specificity, so the
+   unqualified `display: flex` above was overriding hidden="" and the dropdown could never be
+   hidden again once JS set dropdown.hidden = true. This more-specific override restores it. */
+.profile-dropdown[hidden] {
+  display: none;
+}
+.profile-dropdown .name {
+  font-weight: 700;
+  color: var(--text);
+}
+.profile-dropdown .role {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: capitalize;
+  margin-bottom: 4px;
+}
+.profile-dropdown button {
+  width: 100%;
+}
+
+/* ==========================================================================
+   Tools menu — hamburger icon to the left of the page heading, admin/operations
+   only. Same toggle/dropdown mechanics as .profile-menu above, mirrored to open
+   from the left edge instead of the right since it sits at the start of the row.
+   ========================================================================== */
+.page-title-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.tools-menu {
+  position: relative;
+}
+.tools-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 210px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  padding: 10px;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.tools-dropdown[hidden] {
+  display: none;
+}
+.tools-dropdown .section-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  color: var(--text-muted);
+  padding: 4px 8px;
+}
+.tools-dropdown a {
+  padding: 7px 8px;
+  border-radius: 6px;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+.tools-dropdown a:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+.tools-dropdown .divider {
+  height: 1px;
+  background: var(--border);
+  margin: 6px 2px;
+}
+
+.main-content {
+  flex: 1;
+  min-width: 0;
+  padding: 24px;
+}
+
+/* ==========================================================================
+   Bottom nav (mobile) — replaces the sidebar below the 900px breakpoint
+   ========================================================================== */
+.bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+  right: 10px;
+  height: 68px;
+  padding: 6px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(30, 69, 147, 0.12);
+  border-radius: 20px;
+  box-shadow: 0 12px 34px rgba(20, 47, 102, 0.2);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  z-index: 50;
+}
+.bottom-nav a {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+  border-radius: 14px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-faint);
+  transition: background .18s ease, color .18s ease, transform .18s ease;
+}
+.bottom-nav a.active {
+  color: var(--navy);
+  background: var(--navy-tint);
+}
+.bottom-nav svg {
+  width: 21px;
+  height: 21px;
+  stroke-width: 2.2;
+}
+.bottom-nav a[href$="add.html"] {
+  color: var(--navy-dark);
+}
+.bottom-nav a[href$="add.html"] svg {
+  width: 38px;
+  height: 38px;
+  margin-top: -20px;
+  padding: 9px;
+  border-radius: 14px;
+  color: #06301f;
+  background: var(--emerald);
+  box-shadow: 0 7px 18px rgba(18, 168, 107, .3);
+}
+.bottom-nav a:active {
+  transform: scale(.96);
+}
+
+/* Unread-mail badge (see ensureMailNav / setMailBadge in auth.js) */
+.nav-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0;
+}
+.sidebar nav a .nav-badge { margin-left: auto; }
+.bottom-nav a { position: relative; }
+.bottom-nav a .nav-badge {
+  position: absolute;
+  top: 4px;
+  left: calc(50% + 4px);
+  box-shadow: 0 0 0 2px #fff;
+}
+
+.page-title {
+  position: sticky;
+  top: 0;
+  z-index: 35;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 66px;
+  margin: -24px -24px 20px;
+  padding: 12px 24px;
+  background: rgba(245, 247, 251, .94);
+  border-bottom: 1px solid rgba(218, 223, 235, .85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.page-title-left { min-width: 0; }
+.page-title h2 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.page-heading-copy {
+  display: flex;
+  flex-direction: column;
+}
+.page-heading-copy h2 {
+  margin-top: 1px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+}
+.stat-card .label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 6px;
+}
+.stat-card .value {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--navy);
+}
+.stat-card .value.accent {
+  color: var(--emerald-dark);
+}
+.stat-card .sub {
+  font-size: 12px;
+  color: var(--text-faint);
+  margin-top: 4px;
+}
+
+.filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+  align-items: center;
+}
+.filters-row select,
+.filters-row input[type="date"],
+.filters-row input[type="text"] {
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+}
+.chart-card h3 {
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+.chart-card canvas {
+  max-height: 240px;
+}
+
+.table-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+.tabs button {
+  border: none;
+  background: none;
+  padding: 10px 4px;
+  margin-right: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-faint);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+.tabs button.active {
+  color: var(--navy);
+  border-bottom-color: var(--navy);
+}
+
+/* A pill-style two/three-way toggle (e.g. BDT/RMB) — visually similar to .tabs but a distinct
+   class on purpose. Reusing .tabs here previously meant these buttons also matched the global
+   `.tabs button` click handler that switches page tabs, so picking a currency blanked the whole
+   page (every panel's visibility got reset by that handler reading a `data-tab` that didn't
+   exist on these buttons). Never reuse .tabs for anything that isn't a real page-tab bar. */
+.segmented-toggle {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.segmented-toggle button {
+  border: none;
+  background: var(--surface);
+  padding: 9px 20px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.segmented-toggle button + button {
+  border-left: 1px solid var(--border);
+}
+.segmented-toggle button.active {
+  background: var(--navy);
+  color: #fff;
+}
+
+/* A responsive multi-column row of .field blocks (label + input), for forms that live inline on
+   a page rather than in a modal — e.g. the invoice generator. .field's own margin-bottom is
+   zeroed here since the grid's row-gap already spaces rows out. */
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px 16px;
+  margin-bottom: 16px;
+}
+.field-grid .field {
+  margin-bottom: 0;
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 14px;
+}
+.pager-info {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* Inline "this tracking code already exists" warning. Deliberately a warning, not an error —
+   saving is still allowed, since a repeat is occasionally intentional. */
+.dup-warning {
+  margin-top: 6px;
+  padding: 8px 10px;
+  border: 1px solid #f2c744;
+  border-left: 3px solid #f2c744;
+  border-radius: var(--radius-sm);
+  background: #fff9e6;
+  font-size: 12px;
+  color: #6b5200;
+}
+.dup-warning[hidden] {
+  display: none;
+}
+.dup-warning .dup-line {
+  margin-top: 3px;
+}
+.dup-warning .dup-line.muted {
+  color: #8a7330;
+}
+
+/* A tracking entry's note, shown under the code in the list. */
+.entry-note {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* The note surfaced on the Add Shipment page when a scanned/typed code matches a tracking
+   entry — this is information the supplier left for whoever receives the parcel, so it needs
+   to be noticeable rather than a subtle hint. */
+.tracking-note-panel {
+  margin-top: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--navy);
+  border-left: 4px solid var(--navy);
+  border-radius: var(--radius-sm);
+  background: var(--navy-tint);
+}
+.tracking-note-panel[hidden] {
+  display: none;
+}
+.tracking-note-panel .note-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--navy);
+  margin-bottom: 4px;
+}
+.tracking-note-panel .note-body {
+  font-size: 14px;
+  color: var(--text);
+  white-space: pre-wrap;
+}
+.tracking-note-panel .note-context {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   Live BlueSky tracking card (D2D CN / D2D HK entries in tracking.html) and
+   its detail popup — mirrors .live-track's summary/items shape 1:1.
+   ========================================================================== */
+.live-track {
+  margin-top: 10px;
+}
+.live-track-loading,
+.live-track-empty {
+  font-size: 12px;
+  color: var(--text-faint);
+  padding: 4px 0;
+}
+.live-track-card {
+  background: var(--navy-tint);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+.live-track-card:hover {
+  border-color: var(--navy);
+}
+.live-track-card .mark {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--navy);
+  margin-bottom: 8px;
+}
+.live-track-dates {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.live-track-dates .d {
+  text-align: center;
+}
+.live-track-dates .d .label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-faint);
+}
+.live-track-dates .d .val {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-top: 2px;
+}
+
+/* Own class rather than reusing .badge-warehouse — that one's the Warehouse *role* badge on
+   Users admin (`badge-${u.Role}`), solid dark fill by design. This is a shipment *status*, so it
+   matches the light-tint style every other status badge here already uses (amber = in transit,
+   emerald = delivered) instead of standing out as the only solid-fill pill in the list. */
+.badge-received {
+  background: var(--navy-tint);
+  color: var(--navy);
+}
+
+.live-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.live-summary-grid .stat {
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  padding: 10px 8px;
+  text-align: center;
+}
+.live-summary-grid .stat .val {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--navy);
+}
+.live-summary-grid .stat .label {
+  font-size: 10px;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+.live-items {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.live-item-row {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+}
+.live-item-meta,
+.live-item-dates {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.live-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+.live-photo-grid a {
+  display: block;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+}
+.live-photo-grid img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.live-activity {
+  margin-top: 10px;
+  border-top: 1px solid var(--border);
+  padding-top: 9px;
+}
+.live-activity summary {
+  cursor: pointer;
+  color: var(--navy);
+  font-size: 12px;
+  font-weight: 700;
+}
+.live-activity-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 9px;
+}
+.live-activity-row {
+  display: grid;
+  grid-template-columns: 9px 1fr;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.live-activity-row .activity-dot {
+  width: 8px;
+  height: 8px;
+  margin-top: 4px;
+  border-radius: 50%;
+  background: var(--navy);
+}
+.live-activity-row strong {
+  color: var(--text);
+}
+.live-activity-row time {
+  display: block;
+  margin-top: 1px;
+  color: var(--text-faint);
+  font-size: 11px;
+}
+.live-shipment-id {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.live-shipment-id .label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.live-shipment-id .val {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--navy);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  background: var(--navy-tint);
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+  text-align: right;
+}
+
+@media (max-width: 900px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+  .sidebar {
+    display: none;
+  }
+  .bottom-nav {
+    display: flex;
+  }
+  .main-content {
+    padding: 16px;
+    padding-bottom: 98px;
+  }
+  .page-title {
+    min-height: 60px;
+    margin: -16px -16px 16px;
+    padding: 9px 16px;
+    gap: 8px;
+  }
+  .page-title-left { gap: 8px; }
+  .profile-menu { gap: 6px; }
+  .profile-identity { height: 40px; gap: 7px; padding: 3px 5px 3px 9px; }
+  .profile-identity-copy { max-width: 120px; }
+  .profile-identity-name { font-size: 11.5px; }
+  .profile-identity-role { font-size: 9.5px; }
+  .profile-identity > svg { width: 32px; height: 32px; flex-basis: 32px; }
+  /* auto-fit with a 180px minimum only fits one column on a narrow phone, so a dashboard with
+     4-5 stat cards (Analysis, Finance) turned into a long stack of full-width cards — fixing it
+     at 2 columns keeps it compact and scannable instead of a scroll-heavy list of one-liners. */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .stat-card {
+    padding: 12px;
+  }
+  .stat-card .value {
+    font-size: 20px;
+  }
+  .chart-card {
+    padding: 12px;
+  }
+  /* Search/select filters default to content-width flex items, which on a phone leaves each one
+     a different, often-too-narrow size and lets a long option label ("All Payment Status") get
+     clipped. Giving them a shared flex-basis makes them wrap into a tidy, evenly-sized grid. */
+  .filters-row > input,
+  .filters-row > select {
+    flex: 1 1 140px;
+    max-width: none;
+  }
+}
+
+/* Mobile: "Add" is not in the bottom bar — shipments are added with the "+ Add" button on the
+   Shipments page. There is no floating plus button anywhere in the app. */
+@media (max-width: 900px) {
+  .bottom-nav a[href$="add.html"] { display: none; }
+}
+
+/* The green round button used for the main action of a screen (Mail's compose, Last Mile's arrow). */
+.fab-go {
+  position: fixed;
+  right: 16px;
+  bottom: 100px;
+  width: 56px;
+  height: 56px;
+  border: 0;
+  border-radius: 18px;
+  background: var(--emerald);
+  color: #06301f;
+  box-shadow: 0 10px 24px rgba(18, 168, 107, .35);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 45;
+}
+.fab-go[hidden] { display: none; }
+.fab-go:active { transform: scale(.95); }
+.fab-go svg { width: 26px; height: 26px; }
+.fab-go .fab-count { position: absolute; top: -6px; right: -6px; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px; background: var(--navy, #1e4593); color: #fff; font-size: 12px; font-weight: 800; line-height: 22px; text-align: center; box-shadow: 0 0 0 2px #fff; }
+
+/* Last mile (Sundarban) */
+.lm-badge { display: inline-block; margin-top: 4px; padding: 2px 8px; border-radius: 999px; background: #fff4d6; color: #7a5200; font-size: 11px; font-weight: 700; }
+.lm-badge.done { background: #def5e8; color: #0c6a42; }
+.lastmile-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; padding: 10px 12px; border-radius: var(--radius); background: var(--navy-tint, #eaf0fb); color: var(--navy, #1e4593); font-size: 13px; }
+.lastmile-bar[hidden] { display: none; }
+#lastmile-toggle.active { background: var(--navy, #1e4593); color: #fff; border-color: var(--navy, #1e4593); }
+.checkbox:disabled { opacity: .35; cursor: not-allowed; }
+
+/* Tracking > Last Mile tab */
+.lm-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.lm-chip { padding: 6px 12px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--text-muted); font-size: 13px; font-weight: 600; cursor: pointer; }
+.lm-chip.active { background: var(--navy, #1e4593); border-color: var(--navy, #1e4593); color: #fff; }
+.lm-card { margin-bottom: 14px; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-lg, 14px); background: var(--surface); }
+.lm-card-head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+.lm-cn { font-weight: 800; font-size: 15px; letter-spacing: .02em; }
+.lm-route, .lm-when { color: var(--text-faint); font-size: 12.5px; margin-top: 2px; }
+.lm-head-right { text-align: right; flex-shrink: 0; }
+.lm-pill { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+.lm-pill.done { background: #def5e8; color: #0c6a42; }
+.lm-pill.ready { background: #fff4d6; color: #7a5200; }
+.lm-pill.moving { background: #e4edff; color: #1e4593; }
+.lm-pill.waiting { background: #eef0f4; color: #5b6578; }
+.lm-ships { list-style: none; margin: 12px 0 0; padding: 0; border-top: 1px solid var(--border); }
+.lm-ships li { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.lm-ship-main { flex: 1; min-width: 0; }
+.lm-ship-name { font-weight: 700; }
+.lm-ship-sub { color: var(--text-faint); font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lm-actions { display: flex; gap: 6px; margin-top: 8px; }
+.lm-timeline { margin: 10px 0 0; padding: 0 0 0 4px; list-style: none; border-left: 2px solid var(--border); }
+.lm-timeline[hidden] { display: none; }
+.lm-timeline li { position: relative; padding: 0 0 10px 14px; }
+.lm-timeline li::before { content: ""; position: absolute; left: -6px; top: 5px; width: 8px; height: 8px; border-radius: 50%; background: var(--navy, #1e4593); }
+.lm-timeline li span { display: block; color: var(--text-faint); font-size: 12px; }
+.lm-error { margin-top: 8px; padding: 6px 10px; border-radius: 8px; background: #fdeaea; color: #a32727; font-size: 12.5px; }
+
+/* Last-mile delivery box on the customer's shipment view (portal) */
+.courier-box { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border, #e3e7ef); }
+.courier-box h3 { margin: 0 0 8px; font-size: 14px; }
+.courier-timeline { margin: 10px 0 0 4px; padding: 0 0 0 4px; list-style: none; border-left: 2px solid var(--border, #e3e7ef); }
+.courier-timeline li { position: relative; padding: 0 0 10px 14px; font-size: 13.5px; }
+.courier-timeline li::before { content: ""; position: absolute; left: -6px; top: 5px; width: 8px; height: 8px; border-radius: 50%; background: #1e4593; }
+.courier-timeline li span { display: block; color: #6b7487; font-size: 12px; }
+
+/* Two-word page headings stack on phones (see stackTwoWordHeadings in auth.js). */
+@media (max-width: 900px) {
+  .page-title h2.two-line { white-space: normal; overflow: visible; line-height: 1.02; }
+  .page-title h2.two-line .tw { display: block; }
+}
+
+/* In the shipment lists the meta line under a card's divider is plain, selectable text — only the top part opens the shipment. */
+.shipment-item .item-actions { cursor: auto; }
+.shipment-item .item-actions > span { cursor: text; user-select: text; -webkit-user-select: text; }

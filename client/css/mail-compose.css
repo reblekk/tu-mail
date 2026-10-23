@@ -1,0 +1,219 @@
+/* Writing mail: entry points, the compose window, in-app dialogs. Loaded after mail.css. */
+
+.mail-compose-btn { margin-bottom: 14px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+#compose-btn-list { display: none; }
+@media (min-width: 900px) and (max-width: 1359px) { #compose-btn-list { display: inline-flex; } }
+.mail-fab {
+  display: none;
+  position: fixed;
+  right: 16px;
+  bottom: 100px;
+  width: 56px;
+  height: 56px;
+  border: 0;
+  border-radius: 18px;
+  background: var(--emerald);
+  color: #06301f;
+  box-shadow: 0 10px 24px rgba(18, 168, 107, .35);
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 45;
+}
+.mail-fab:active { transform: scale(.95); }
+@media (max-width: 899px) {
+  .mail-fab { display: inline-flex; }
+  .mail-app[data-view="read"] .mail-fab { display: none; }
+}
+.tool-divider { width: 1px; height: 20px; background: var(--border); margin: 0 6px; flex-shrink: 0; }
+.mail-item .badges svg.answered-icon { color: var(--navy); }
+
+html.cmp-open, html.cmp-open body { overflow: hidden; }
+.cmp-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgba(16, 24, 47, .5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.cmp-overlay[hidden] { display: none; }
+.cmp-window {
+  position: relative;
+  width: 100%;
+  max-width: 880px;
+  height: min(88vh, 800px);
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.cmp-head { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.cmp-head h3 { flex: 1; margin: 0; font-family: var(--font); text-transform: none; letter-spacing: 0; font-size: 16px; font-weight: 700; }
+.cmp-back, .cmp-send-icon { display: none; }
+.cmp-progress { height: 3px; flex-shrink: 0; }
+.cmp-window.loading .cmp-progress, .cmp-window.sending .cmp-progress {
+  background: linear-gradient(90deg, transparent, var(--navy), transparent) no-repeat;
+  background-size: 45% 100%;
+  animation: cmp-slide 1s linear infinite;
+}
+@keyframes cmp-slide { from { background-position: -50% 0; } to { background-position: 160% 0; } }
+.cmp-window.loading .cmp-fields, .cmp-window.loading .cmp-toolbar, .cmp-window.loading .cmp-editor-wrap,
+.cmp-window.sending .cmp-fields, .cmp-window.sending .cmp-toolbar, .cmp-window.sending .cmp-editor-wrap { opacity: .55; pointer-events: none; }
+.cmp-error {
+  margin: 8px 14px 0;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--danger-tint);
+  color: #9b1c20;
+  font-size: 13px;
+  line-height: 1.4;
+  flex-shrink: 0;
+}
+.cmp-error[hidden] { display: none; }
+.cmp-fields { padding: 2px 14px 0; flex-shrink: 0; }
+.cmp-row { position: relative; display: flex; align-items: flex-start; gap: 10px; padding: 4px 0; border-bottom: 1px solid var(--border); min-height: 40px; }
+.cmp-row[hidden] { display: none; }
+.cmp-row > label { flex: 0 0 58px; padding-top: 9px; font-size: 13px; color: var(--text-muted); font-weight: 600; }
+.cmp-from { flex: 1; min-width: 0; padding-top: 9px; font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cmp-toggles { display: inline-flex; flex-shrink: 0; }
+.cmp-toggles button { border: 0; background: none; color: var(--navy); font-weight: 700; font-size: 13px; padding: 7px 6px; cursor: pointer; }
+.cmp-toggles button[hidden] { display: none; }
+.cmp-chips { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; gap: 5px; align-items: center; cursor: text; padding: 3px 0; }
+.cmp-chips input { flex: 1 1 140px; min-width: 120px; border: 0; outline: 0; background: transparent; padding: 6px 0; font-size: 14px; box-shadow: none; }
+.cmp-chip {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  background: var(--navy-tint);
+  color: var(--navy-dark);
+  border-radius: 999px;
+  padding: 2px 4px 2px 11px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.cmp-chip.invalid { background: var(--danger-tint); color: #9b1c20; }
+.cmp-chip .who { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 280px; }
+.cmp-chip .x { border: 0; background: none; color: inherit; font-size: 17px; line-height: 1; cursor: pointer; padding: 0 5px; opacity: .65; }
+.cmp-chip .x:hover { opacity: 1; }
+.cmp-subject { flex: 1; min-width: 0; border: 0; outline: 0; padding: 8px 0; font-size: 14.5px; font-weight: 400; background: transparent; box-shadow: none; }
+.cmp-suggest {
+  position: absolute;
+  left: 68px;
+  right: 0;
+  top: 100%;
+  z-index: 6;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.cmp-suggest[hidden] { display: none; }
+.cmp-suggest-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; cursor: pointer; }
+.cmp-suggest-item.active, .cmp-suggest-item:hover { background: var(--navy-tint); }
+.cmp-suggest-item .av { width: 30px; height: 30px; border-radius: 50%; background: var(--navy); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+.cmp-suggest-item .t { display: flex; flex-direction: column; min-width: 0; font-size: 13px; }
+.cmp-suggest-item .t b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cmp-suggest-item .t span { color: var(--text-muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.cmp-toolbar { display: flex; align-items: center; gap: 2px; padding: 6px 10px; border-bottom: 1px solid var(--border); overflow-x: auto; flex-shrink: 0; background: #fafbfd; scrollbar-width: none; margin-top: 8px; }
+.cmp-toolbar::-webkit-scrollbar { display: none; }
+.cmp-tool { width: 32px; height: 32px; flex: 0 0 auto; border: 0; background: transparent; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; color: var(--text-muted); cursor: pointer; font-size: 14px; font-family: var(--font); }
+.cmp-tool svg { width: 17px; height: 17px; }
+.cmp-tool:hover { background: var(--bg-2); color: var(--text); }
+.cmp-tool.on { background: var(--navy-tint); color: var(--navy); }
+.cmp-sep { width: 1px; height: 20px; background: var(--border); margin: 0 5px; flex: 0 0 auto; }
+.cmp-size-select { border: 1px solid var(--border); border-radius: 6px; padding: 5px 6px; font-size: 12.5px; background: #fff; flex: 0 0 auto; width: auto; }
+.cmp-color { position: relative; width: 32px; height: 32px; flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; cursor: pointer; color: var(--navy); font-weight: 800; }
+.cmp-color:hover { background: var(--bg-2); }
+.cmp-color input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; padding: 0; border: 0; }
+.cmp-color span { border-bottom: 3px solid var(--danger); line-height: 1; padding: 0 2px; pointer-events: none; }
+
+.cmp-editor-wrap { position: relative; flex: 1; min-height: 0; background: #fff; }
+.cmp-editor-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.cmp-attachments { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 14px; border-top: 1px solid var(--border); max-height: 100px; overflow: auto; flex-shrink: 0; }
+.cmp-attachments[hidden] { display: none; }
+.cmp-att { display: inline-flex; align-items: center; gap: 7px; max-width: 100%; padding: 4px 4px 4px 9px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 12.5px; background: var(--surface); }
+.cmp-att svg { width: 15px; height: 15px; color: var(--navy); flex-shrink: 0; }
+.cmp-att .n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; max-width: 220px; }
+.cmp-att .s { color: var(--text-faint); flex-shrink: 0; }
+.cmp-att .x { border: 0; background: none; font-size: 16px; line-height: 1; color: var(--text-muted); cursor: pointer; padding: 0 5px; }
+.cmp-att .x:hover { color: var(--danger); }
+.cmp-foot { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-top: 1px solid var(--border); flex-shrink: 0; background: var(--surface); }
+.cmp-foot .btn { display: inline-flex; align-items: center; gap: 6px; }
+.cmp-foot .btn svg { width: 16px; height: 16px; }
+.cmp-size { font-size: 12px; color: var(--text-faint); }
+.cmp-size.warn { color: var(--danger); font-weight: 700; }
+.cmp-status { font-size: 13px; color: var(--text-muted); margin-left: auto; }
+.cmp-window.dragging::after {
+  content: "Drop files to attach";
+  position: absolute;
+  inset: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed var(--navy);
+  border-radius: var(--radius);
+  background: rgba(234, 239, 251, .9);
+  color: var(--navy-dark);
+  font-weight: 700;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.cmp-dialog-overlay { position: fixed; inset: 0; z-index: 100; background: rgba(16, 24, 47, .45); display: flex; align-items: center; justify-content: center; padding: 20px; }
+.cmp-dialog { width: 100%; max-width: 380px; background: #fff; border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-lg); }
+.cmp-dialog h4 { margin: 0 0 6px; font-family: var(--font); text-transform: none; letter-spacing: 0; font-size: 16px; }
+.cmp-dialog p { margin: 0 0 14px; font-size: 13.5px; color: var(--text-muted); line-height: 1.5; }
+.cmp-dialog-input { width: 100%; margin-bottom: 14px; }
+.cmp-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; }
+
+@media (max-width: 899px) {
+  .cmp-overlay { padding: 0; align-items: stretch; }
+  .cmp-window { max-width: none; height: 100vh; height: 100dvh; border-radius: 0; }
+  .cmp-close { display: none; }
+  .cmp-back { display: inline-flex; }
+  .cmp-send-icon { display: inline-flex; color: var(--navy); }
+  .cmp-send-icon svg { width: 22px; height: 22px; }
+  .cmp-head { padding: 8px 10px; }
+  .cmp-fields { padding: 0 12px; }
+  .cmp-row > label { flex-basis: 50px; }
+  .cmp-suggest { left: 60px; }
+  .cmp-chips input, .cmp-subject { font-size: 16px; }
+  .cmp-foot #cmp-send { display: none; }
+  .cmp-foot { padding: 8px 12px; padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px)); }
+  .cmp-discard { margin-left: auto; }
+  .cmp-status { margin-left: 0; }
+}
+
+/* Signature editor dialog */
+.sig-dialog { max-width: 560px; }
+.sig-toolbar { margin: 10px 0 0; border: 1px solid var(--border, #d9dee8); border-bottom: 0; border-radius: 8px 8px 0 0; }
+.sig-editor-wrap { border: 1px solid var(--border, #d9dee8); border-radius: 0 0 8px 8px; margin-bottom: 12px; }
+.sig-editor-wrap iframe { display: block; width: 100%; height: 180px; border: 0; background: #fff; }
+.sig-check { display: flex; gap: 8px; align-items: center; font-size: 14px; margin: 6px 0; }
+.mail-signature-link { display: flex; align-items: center; gap: 8px; margin: 8px 12px 12px; padding: 8px 10px; border: 0; background: none; color: inherit; font: inherit; font-size: 14px; border-radius: 8px; cursor: pointer; opacity: .8; }
+.mail-signature-link:hover { background: rgba(127, 127, 127, .12); opacity: 1; }
+
+/* Notifications dialog */
+.notify-dialog { max-width: 460px; }
+.notify-dialog p { margin: 8px 0; font-size: 14px; line-height: 1.45; }
+.notify-dialog .nt-state { font-weight: 700; }
+.notify-dialog .nt-state.on { color: var(--emerald-dark, #0c7a4d); }
+.notify-dialog .nt-state.off { color: var(--text-faint); }
+.notify-dialog .nt-note { background: var(--navy-tint); border-radius: 8px; padding: 10px 12px; }
+.notify-dialog .nt-line { color: var(--text-faint); font-size: 13px; }
+.notify-dialog .nt-warn { color: #a05a00; }
+.notify-dialog .nt-msg { font-size: 13px; padding: 8px 10px; border-radius: 8px; background: var(--navy-tint); }
+.notify-dialog .nt-msg.good { background: #e3f6ec; color: #0c6a42; }
+.notify-dialog .nt-msg.bad { background: #fdeaea; color: #a32727; }
+
+/* One-time offer to allow notifications on this device */
+.mail-notify-banner { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 8px; padding: 8px 10px; border-radius: 10px; background: var(--navy-tint); font-size: 13px; }
+.mail-notify-banner .nb-text { flex: 1 1 160px; font-weight: 600; color: var(--navy); }
