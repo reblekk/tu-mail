@@ -1,3 +1,4 @@
+process.env.TU_MAIL_LOG='off';
 const {test,after}=require('node:test');
 const assert=require('node:assert/strict');
 const imap=require('../server/services/mail-imap');
