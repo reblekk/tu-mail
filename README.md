@@ -10,6 +10,10 @@ Requires Node.js 20 or later. Run `npm install`, then `npm start` from this dire
 
 Default profile is a TU Darmstadt student mailbox. Enter your full email address, TU-ID (not email) and password in the local sign-in page. IMAP: imap.stud.tu-darmstadt.de:993; SMTP: smtp.tu-darmstadt.de:465. Both use TLS with certificate verification. Official source: https://www.hrz.tu-darmstadt.de/support_und_anleitungen/hrz_anleitungen/linux_mailbox/e_mail_einrichten/index.en.jsp (checked 2026-10-22). Other university mailbox types may need different server settings; confirm them with HRZ first.
 
+## Other universities
+
+Set `MAIL_EMAIL_DOMAIN` (allowed sign-in domain), `MAIL_PROFILES` (JSON list of IMAP hosts) and `MAIL_SMTP_HOST`/`MAIL_SMTP_PORT` in `.env`. See `.env.example`. These are operator settings; the browser can never choose a server. Not tested against any provider other than TU Darmstadt.
+
 ## Included
 
 Folders, search, threads, compose/reply/forward, attachments, drafts, move/archive/delete, signatures. Mail actions operate on the real mailbox after login. Signatures are stored under data/settings; mailbox contents are cached only in page memory. Passwords are held in server memory in an eight-hour session and removed on logout, expiry or restart. Background push notifications are not included.

@@ -25,6 +25,8 @@ test('standalone login, session boundary, origin checks and logout',async()=>{
  assert.equal((await request('/api/mail/folders',{headers})).status,200);
  assert.equal((await request('/api/mail/folders',{headers:{Cookie:'tu_mail_session=tampered'}})).status,401);
  assert.equal((await request('/api/mail/watch',{headers})).status,404);
+ assert.equal((await request('/api/mail/messages/1/attachments/0?folder=INBOX')).status,401);
+ assert.equal((await request('/api/mail/messages/1/attachments/0?folder=INBOX',{headers:{Cookie:'tu_mail_session=tampered'}})).status,401);
  assert.equal((await request('/api/auth/logout',{method:'POST',headers})).status,200);
  assert.equal((await request('/api/mail/folders',{headers})).status,401);
 });

@@ -3,7 +3,7 @@ require('dotenv').config({path:path.join(__dirname,'../.env')});
 process.env.MAIL_IMAP_HOST ||= 'imap.stud.tu-darmstadt.de';
 process.env.MAIL_SMTP_HOST ||= 'smtp.tu-darmstadt.de';
 const express=require('express'),session=require('./services/mail-session'),imap=require('./services/mail-imap');
-const { accountProfile }=require('./services/account-profiles');
+const { accountProfile, allowedEmail }=require('./services/account-profiles');
 const app=express();
 app.disable('x-powered-by');
 app.use((req,res,next)=>{res.set('X-Content-Type-Options','nosniff');res.set('Referrer-Policy','no-referrer');res.set('X-Frame-Options','DENY');if(req.path.startsWith('/api/'))res.set('Cache-Control','no-store');
@@ -12,7 +12,7 @@ app.use((req,res,next)=>{res.set('X-Content-Type-Options','nosniff');res.set('Re
 app.use(express.json({limit:'1mb'}));
 let attempts=[];
 app.post('/api/auth/login',async(req,res)=>{attempts=attempts.filter(t=>t>Date.now()-60000);if(attempts.length>=8)return res.status(429).json({error:'Too many attempts. Wait one minute.'});attempts.push(Date.now());
- const {email,username,password,profile}=req.body || {};if(typeof email!=='string'||!/^[-.\w+]+@(?:[a-z0-9-]+\.)*tu-darmstadt\.de$/i.test(email)||typeof username!=='string'||! /^[a-z0-9_-]{3,64}$/i.test(username)||typeof password!=='string'||!password||password.length>1024)return res.status(400).json({error:'Enter your TU email address, TU-ID and password.'});
+ const {email,username,password,profile}=req.body || {};if(typeof email!=='string'||!allowedEmail(email)||typeof username!=='string'||! /^[a-z0-9_-]{3,64}$/i.test(username)||typeof password!=='string'||!password||password.length>1024)return res.status(400).json({error:'Enter your TU email address, TU-ID and password.'});
  try{const settings=accountProfile({email:email.toLowerCase(),username,profile});await imap.verifyCredentials({email:email.toLowerCase(),username,password,...settings});const user={userId:settings.profile+':'+email.toLowerCase(),email:email.toLowerCase(),username,name:username,role:'mail',...settings};session.create(req,res,user,password);res.json({user});}catch(e){res.status(e.status || (e.code==='MAIL_AUTH'?401:502)).json({error:e.status===400?e.message:e.code==='MAIL_AUTH'?'The mailbox rejected your TU-ID or password.':'Unable to connect to the mail server. Check your connection and server settings.'});}});
 app.get('/api/auth/me',session.verifyToken,(req,res)=>res.json({user:req.user}));
 app.get('/api/auth/accounts',session.verifyToken,(req,res)=>res.json({accounts:session.listAccounts(req)}));
