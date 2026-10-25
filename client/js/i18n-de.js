@@ -2,7 +2,7 @@
 (function (root) {
   var de = {
     // Sign-in
-    'TU Mail — Sign in': 'TU Mail — Anmelden',
+    'TUDa Mail — Sign in': 'TUDa Mail — Anmelden',
     'Webmail': 'Webmail',
     'Sign in with your university account.': 'Melden Sie sich mit Ihrem Hochschulkonto an.',
     'Email address': 'E-Mail-Adresse',
@@ -17,7 +17,7 @@
     'Skip to main content': 'Zum Hauptinhalt springen',
 
     // Mail page frame
-    'Mail — TU Mail': 'Mail — TU Mail',
+    'Mail — TUDa Mail': 'Mail — TUDa Mail',
     'Mail': 'Mail',
     'Inbox': 'Posteingang',
     'Drafts': 'Entwürfe',
@@ -356,7 +356,7 @@
     'Send-as addresses saved': 'Absenderadressen gespeichert',
 
     // Calendar and notifications
-    'Calendar — TU Mail': 'Kalender — TU Mail',
+    'Calendar — TUDa Mail': 'Kalender — TUDa Mail',
     'Calendar': 'Kalender',
     'Previous': 'Zurück',
     'Today': 'Heute',

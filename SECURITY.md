@@ -2,7 +2,7 @@
 
 ## Supported deployments
 
-TU Mail supports two ways of running:
+TUDa Mail supports two ways of running:
 
 - **Local, single user**: the default. Binds to 127.0.0.1 only.
 - **Operator deployment**: one instance behind a TLS-terminating reverse proxy, configured with `PUBLIC_URL` and `TRUST_PROXY`. See "Deploying for other people" in the README.

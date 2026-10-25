@@ -4,7 +4,7 @@ const CACHE = 'tu-mail-shell-v1';
 const SHELL = [
   '/', '/index.html', '/mail.html', '/calendar.html', '/manifest.webmanifest',
   '/css/login.css', '/css/main.css', '/css/dashboard.css', '/css/mobile.css', '/css/mail.css', '/css/mail-compose.css',
-  '/css/mail-cards.css', '/css/features.css', '/css/calendar.css', '/css/standalone.css', '/css/a11y.css', '/css/print.css',
+  '/css/mail-cards.css', '/css/features.css', '/css/calendar.css', '/css/standalone.css', '/css/a11y.css', '/css/modern.css', '/css/print.css',
   '/js/i18n.js', '/js/i18n-de.js', '/js/brand.js', '/js/pwa.js', '/js/ui-prefs.js', '/js/a11y.js', '/js/shortcuts.js',
   '/js/login.js', '/js/auth.js', '/js/mail-app.js', '/js/mail-cache.js', '/js/mail-thread.js', '/js/mail-preview.js',
   '/js/mail-organize.js', '/js/mail-recovery.js', '/js/mail-compose.js', '/js/mail-signature.js', '/js/mail-tools.js',

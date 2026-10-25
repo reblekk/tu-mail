@@ -175,7 +175,7 @@ function renderFolders() {
   $('mail-folder-title').innerHTML = titleHtml;
   $('mail-top-title').innerHTML = titleHtml;
   const unseen = inboxUnseen();
-  document.title = `${unseen ? `(${unseen}) ` : ''}Mail — TU Mail`;
+  document.title = `${unseen ? `(${unseen}) ` : ''}Mail — ${window.TuBrandName || 'TUDa Mail'}`;
 }
 $('mail-folder-list').addEventListener('click', (e) => {
   const li = e.target.closest('.mail-folder');

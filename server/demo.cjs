@@ -6,7 +6,7 @@ const app = express();
 const client = path.join(__dirname, '../client');
 const user = { userId:'demo', email:'demo@example.test', username:'demo', name:'Demo Student', role:'mail' };
 const examples = [
- ['Welcome to your demo inbox','TU Mail Demo','welcome@example.test','This is a sample mailbox. Explore the folders and open messages to preview TU Mail. No university account is connected and no messages can be sent.'],
+ ['Welcome to your demo inbox','TUDa Mail Demo','welcome@example.test','This is a sample mailbox. Explore the folders and open messages to preview TUDa Mail. No university account is connected and no messages can be sent.'],
  ['Study group — Thursday at 16:00','Alex Morgan','alex@example.test','Hi! Shall we meet at the library at 16:00 on Thursday? Bring your notes from the last lecture. See you there!'],
  ['Your library reservation is ready','Campus Library (demo)','library@example.test','Your reserved study space is ready. This fictional message shows how university notifications appear in your inbox.'],
  ['Project meeting: agenda for next week','Seminar Team (demo)','seminar@example.test','For our next meeting, please prepare a short project update. Agenda: progress, questions, and next steps.'],
@@ -19,7 +19,7 @@ app.use((req,res,next)=>{res.set('Cache-Control','no-store');res.set('X-Content-
 app.get(['/', '/index.html','/mail.html'],(req,res)=>{
  let html=fs.readFileSync(path.join(client,'mail.html'),'utf8');
  html=html.replace('<script src="js/auth.js"></script>','<script>sessionStorage.setItem("tu-mail-user",'+JSON.stringify(JSON.stringify(user))+');</script><script src="js/auth.js"></script>');
- html=html.replace('<span>TU Mail</span>','<span>TU Mail · Demo</span>').replace('<span class="wide-title">Mail</span>','<span class="wide-title">Demo inbox</span>');
+ html=html.replace('<span>TUDa Mail</span>','<span>TUDa Mail · Demo</span>').replace('<span class="wide-title">Mail</span>','<span class="wide-title">Demo inbox</span>');
  html=html.replace('<body>','<body><div style="background:#fff4cf;color:#654c00;padding:10px 18px;text-align:center;font:13px system-ui">DEMO · Fictional emails · No account connected · Sending is disabled</div>');
  res.type('html').send(html);
 });

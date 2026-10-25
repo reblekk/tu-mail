@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const DEFAULTS = {
-  name: 'TU Mail',
+  name: 'TUDa Mail',
   color: '#b90f22',
   helpUrl: 'https://www.hrz.tu-darmstadt.de/support_und_anleitungen/hrz_anleitungen/linux_mailbox/e_mail_einrichten/index.en.jsp',
   footer: 'Independent local mail client · Not an official TU Darmstadt service',

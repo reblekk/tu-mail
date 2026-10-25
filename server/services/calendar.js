@@ -107,7 +107,7 @@ function entryFrom(vevent, ics, source) {
 function singleEventIcs(calendar, vevent) {
   const out = new ICAL.Component(['vcalendar', [], []]);
   out.updatePropertyWithValue('version', '2.0');
-  out.updatePropertyWithValue('prodid', '-//TU Mail//Calendar//EN');
+  out.updatePropertyWithValue('prodid', '-//TUDa Mail//Calendar//EN');
   const clone = (c) => new ICAL.Component(JSON.parse(JSON.stringify(c.toJSON())));
   for (const zone of calendar.getAllSubcomponents('vtimezone')) out.addSubcomponent(clone(zone));
   out.addSubcomponent(clone(vevent));
@@ -159,7 +159,7 @@ async function create(email, fields) {
   const end = fields.end ? validDate(fields.end, allDay) : null;
   const vcal = new ICAL.Component(['vcalendar', [], []]);
   vcal.updatePropertyWithValue('version', '2.0');
-  vcal.updatePropertyWithValue('prodid', '-//TU Mail//Calendar//EN');
+  vcal.updatePropertyWithValue('prodid', '-//TUDa Mail//Calendar//EN');
   const vevent = new ICAL.Component('vevent');
   const uid = crypto.randomUUID() + '@tu-mail';
   vevent.updatePropertyWithValue('uid', uid);
@@ -225,7 +225,7 @@ async function exportIcs(email) {
   const data = await read(email);
   const out = new ICAL.Component(['vcalendar', [], []]);
   out.updatePropertyWithValue('version', '2.0');
-  out.updatePropertyWithValue('prodid', '-//TU Mail//Calendar//EN');
+  out.updatePropertyWithValue('prodid', '-//TUDa Mail//Calendar//EN');
   out.updatePropertyWithValue('calscale', 'GREGORIAN');
   const zones = new Set();
   const clone = (c) => new ICAL.Component(JSON.parse(JSON.stringify(c.toJSON())));

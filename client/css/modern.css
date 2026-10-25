@@ -1,0 +1,255 @@
+/* A lighter, more current look on top of the existing styles: same TU red and structure, with a clean
+   sans-serif, rounded shapes, soft depth and calmer lines. Loaded last on every page, so deleting this
+   file returns the previous look. */
+:root {
+  --font: "Inter", "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: var(--font);
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 18px;
+  --bg: #f5f6f8;
+  --bg-2: #eceef2;
+  --surface: #ffffff;
+  --border: #e5e8ee;
+  --text: #1c2333;
+  --text-muted: #566075;
+  --text-faint: #7b8598;
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, .06);
+  --shadow: 0 4px 16px rgba(16, 24, 40, .08);
+  --shadow-lg: 0 18px 44px rgba(16, 24, 40, .20);
+  --ring: 0 0 0 4px color-mix(in srgb, var(--navy, #b90f22) 18%, transparent);
+  --ease: cubic-bezier(.2, .7, .2, 1);
+}
+html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+body, button, input, select, textarea { font-family: var(--font); }
+body { background: var(--bg); color: var(--text); letter-spacing: -.003em; }
+h1, h2, h3, h4, .cmp-head h3, .cmp-dialog h3, .mail-utility-dialog h2, .msg-subject, .cal-heading, .cal-day h4 {
+  font-family: var(--font); font-weight: 650; letter-spacing: -.015em; color: var(--text);
+}
+a { text-underline-offset: 3px; }
+::selection { background: color-mix(in srgb, var(--navy, #b90f22) 22%, transparent); }
+
+/* ---------- controls ---------- */
+button, .btn, .cal-btn { transition: background-color .15s var(--ease), border-color .15s var(--ease), box-shadow .15s var(--ease), transform .08s var(--ease), color .15s var(--ease); }
+button:active:not(:disabled), .cal-btn:active { transform: translateY(1px); }
+.btn, .cal-btn { border-radius: var(--radius-sm); font-weight: 600; }
+.btn-primary, .mail-compose-btn, .cmp-send, .mail-fab, .cal-primary {
+  border-radius: var(--radius-sm); box-shadow: 0 1px 2px rgba(16, 24, 40, .12), 0 4px 10px -4px color-mix(in srgb, var(--navy, #b90f22) 55%, transparent);
+}
+.btn-primary:hover:not(:disabled), .mail-compose-btn:hover, .cmp-send:hover, .cal-primary:hover { box-shadow: 0 2px 4px rgba(16, 24, 40, .14), 0 8px 16px -6px color-mix(in srgb, var(--navy, #b90f22) 60%, transparent); }
+.btn-secondary, .cal-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text); box-shadow: var(--shadow-sm); }
+.btn-secondary:hover, .cal-btn:hover { background: var(--bg); border-color: #d3d8e0; }
+.mail-fab { border-radius: 16px; }
+input[type="text"], input[type="email"], input[type="password"], input[type="search"], input[type="date"], input[type="datetime-local"], textarea, select, input:not([type]) {
+  border-radius: 10px; border: 1px solid #d5dae3; background: var(--surface); color: var(--text);
+  transition: border-color .15s var(--ease), box-shadow .15s var(--ease);
+}
+input:hover:not(:focus):not([type="checkbox"]):not([type="radio"]), textarea:hover:not(:focus), select:hover:not(:focus) { border-color: #b9c0cd; }
+input:focus, textarea:focus, select:focus { outline: none; border-color: var(--navy, #b90f22); box-shadow: var(--ring); }
+:where(a, button, [tabindex]):focus-visible { outline: none; box-shadow: var(--ring); border-radius: 8px; }
+input[type="checkbox"], input[type="radio"] { accent-color: var(--navy, #b90f22); }
+
+/* ---------- header ---------- */
+.mail-main .page-title {
+  min-height: 60px; padding: 8px 20px; background: var(--surface);
+  border-bottom: 1px solid var(--border); box-shadow: inset 0 3px 0 var(--navy, #b90f22), var(--shadow-sm);
+}
+.page-title h2 { font-size: 19px; font-weight: 650; color: var(--text); }
+.tu-header-logo { width: 128px; height: 44px; }
+.profile-menu .btn, .account-menu summary { border-radius: 999px; }
+.account-menu summary { padding: 8px 14px; color: var(--text-muted); font: 500 13px var(--font); transition: background-color .15s var(--ease); }
+.account-menu summary:hover, .account-menu[open] summary { background: var(--bg-2); color: var(--text); }
+.account-panel {
+  top: calc(100% + 6px); min-width: 260px; padding: 8px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; box-shadow: var(--shadow-lg);
+}
+.account-panel strong { padding: 8px 10px 10px; color: var(--text-muted); font-weight: 500; font-size: 12px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+.account-panel button { padding: 9px 10px; border-radius: 8px; font: 500 14px var(--font); color: var(--text); background: transparent; }
+.account-panel button:hover { background: var(--navy-tint); color: var(--navy-dark); }
+
+/* ---------- sidebar ---------- */
+.mail-folders { background: var(--bg); border-right: 1px solid var(--border); }
+.mail-folders-head { padding: 18px 14px 12px; }
+.mail-compose-btn { border-radius: 12px; min-height: 44px; font-weight: 650; }
+.mail-folders-head .label, .mail-folders .label { color: var(--text-faint); font-size: 11px; font-weight: 650; letter-spacing: .07em; text-transform: uppercase; }
+.mail-folders-head .address { color: var(--text-muted); font-size: 12px; }
+.mail-folder-list { padding: 6px 10px; }
+.mail-folder { border-left: 0; border-radius: 10px; min-height: 40px; margin: 2px 0; padding-left: 12px; color: var(--text-muted); font-weight: 500; transition: background-color .15s var(--ease), color .15s var(--ease); }
+.mail-folder:hover { background: rgba(16, 24, 40, .05); color: var(--text); }
+.mail-folder.active { background: var(--navy-tint); color: var(--navy-dark); font-weight: 650; box-shadow: none; }
+.mail-folder.active:hover { background: var(--navy-tint); }
+.mail-folder .count, .mail-folder .badge, .mail-folder .unread-count { border-radius: 999px; }
+.mail-signature-link, .mail-extra-tools button, a.mail-signature-link { border-radius: 10px; margin: 2px 10px; width: calc(100% - 20px); padding: 9px 12px; color: var(--text-muted); font-weight: 500; font-size: 14px; }
+.mail-signature-link:hover, .mail-extra-tools button:hover { background: rgba(16, 24, 40, .05); color: var(--text); }
+.mail-extra-tools { border-top: 1px solid var(--border); padding: 8px 0; }
+
+/* ---------- list ---------- */
+.mail-list-pane { background: var(--surface); }
+.mail-list-head { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 14px 10px; }
+.mail-list-title-row h3 { font-size: 20px; font-weight: 700; }
+.mail-search { margin: 0; }
+.mail-search input { border-radius: 12px; background: var(--bg); border: 1px solid transparent; padding: 10px 40px 10px 38px; font-size: 14px; }
+.mail-search input:focus { background: var(--surface); }
+.mail-chip { border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--text-muted); padding: 5px 13px; font-weight: 550; font-size: 13px; }
+.mail-chip:hover { background: var(--bg); color: var(--text); }
+.mail-chip.active { background: var(--navy-tint); border-color: color-mix(in srgb, var(--navy, #b90f22) 35%, transparent); color: var(--navy-dark); }
+.mail-list { padding: 6px 8px 12px; }
+.mail-item {
+  margin: 2px 0; padding: 12px 12px 12px 12px; border: 0; border-radius: 12px; background: transparent;
+  transition: background-color .15s var(--ease), box-shadow .15s var(--ease);
+}
+.mail-item:hover { background: var(--bg); }
+.mail-item.selected { background: var(--navy-tint); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--navy, #b90f22) 22%, transparent); }
+.mail-item.unread::before { left: 3px; top: 50%; bottom: auto; width: 8px; height: 8px; margin-top: -4px; border-radius: 50%; background: var(--navy, #b90f22); }
+.mail-item.unread { padding-left: 18px; }
+.mail-item .from { font-size: 14px; font-weight: 550; }
+.mail-item.unread .from, .mail-item.unread .subject { font-weight: 650; }
+.mail-item.unread .subject { color: var(--text); }
+.mail-item .subject { font-size: 13.5px; color: var(--text); }
+.mail-item .preview { color: var(--text-muted); }
+.mail-item .date { font-size: 12px; color: var(--text-faint); font-weight: 500; }
+.mail-item.unread .date { color: var(--navy, #b90f22); font-weight: 650; }
+.mail-avatar, .mail-item .avatar, .card-avatar { border-radius: 50% !important; }
+.mail-item .avatar, .card-avatar { background: var(--navy-tint) !important; color: var(--navy-dark) !important; }
+.mail-more .btn { border-radius: 999px; }
+.draft-tag { border-radius: 6px; }
+.mail-empty { color: var(--text-muted); }
+.mail-empty .big { font-weight: 650; color: var(--text); }
+.mail-filter-panel { background: var(--bg); border-top: 1px solid var(--border); border-radius: 0 0 14px 14px; }
+.mail-bulk { border-radius: 12px; }
+
+/* ---------- reader ---------- */
+.mail-read-pane { background: var(--bg); }
+.mail-read-empty { background: var(--bg); color: var(--text-faint); }
+.msg-toolbar { background: var(--surface); border-bottom: 1px solid var(--border); gap: 2px; padding: 8px 12px; }
+.mail-tool { border-radius: 10px; color: var(--text-muted); font-weight: 550; transition: background-color .15s var(--ease), color .15s var(--ease); }
+.mail-tool:hover { background: var(--bg-2); color: var(--text); }
+.mail-icon-btn { border-radius: 10px; }
+.mail-icon-btn:hover { background: var(--bg-2); }
+.tool-divider { background: var(--border); }
+.msg-scroll { background: var(--bg); }
+.thread-head { padding: 22px 24px 6px; }
+.msg-subject { font-size: 22px; line-height: 1.25; }
+.thread { padding: 8px 22px 32px; gap: 14px; }
+.msg-card { border: 1px solid var(--border); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow-sm); overflow: hidden; }
+.card-head-collapsed:hover { background: var(--bg); }
+.card-name { font-weight: 650; }
+.card-btn { border-radius: 999px; border: 1px solid var(--border); background: var(--surface); padding: 7px 14px; font-weight: 550; box-shadow: var(--shadow-sm); }
+.card-btn:hover { background: var(--bg); }
+.card-foot { padding: 4px 20px 18px; gap: 8px; }
+.card-action { border-radius: 10px; }
+.msg-banner, .safety-banner, .translate-bar { border-radius: 12px; margin-left: 16px; margin-right: 16px; }
+.msg-attachment { border-radius: 12px; border: 1px solid var(--border); background: var(--bg); }
+.msg-frame { border-radius: 4px; }
+.card-details { border-radius: 10px; }
+
+/* ---------- compose, dialogs, popups ---------- */
+.cmp-overlay, .cmp-dialog-overlay { background: rgba(16, 24, 40, .45); backdrop-filter: blur(3px); }
+.cmp-window { border: 0; border-radius: 18px; box-shadow: var(--shadow-lg); overflow: hidden; }
+.cmp-head { border-top: 0; background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 20px; }
+.cmp-head h3 { font-size: 17px; }
+.cmp-toolbar, .cmp-foot { background: var(--bg); }
+.cmp-toolbar button, .cmp-tool, .cmp-size-select, .cmp-att { border-radius: 8px; }
+.cmp-chip { border-radius: 999px; }
+.cmp-suggest { border-radius: 12px; box-shadow: var(--shadow-lg); border: 1px solid var(--border); overflow: hidden; }
+.cmp-dialog, .mail-card { border: 0; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); }
+.mail-utility-dialog { border: 0; border-top: 0; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); padding: 26px; color: var(--text); font-family: var(--font); }
+.mail-utility-dialog::backdrop { background: rgba(16, 24, 40, .45); backdrop-filter: blur(3px); }
+.mail-utility-dialog h2 { font: 650 21px var(--font); margin-bottom: 16px; }
+.mail-utility-dialog input { border-radius: 10px; padding: 10px 12px; border: 1px solid #d5dae3; }
+.mail-utility-dialog button { border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--navy-dark); font-weight: 600; padding: 9px 14px; box-shadow: var(--shadow-sm); }
+.mail-utility-dialog button:hover { background: var(--navy-tint); border-color: transparent; }
+.mail-utility-dialog a { color: var(--navy, #b90f22); font-weight: 550; }
+.mail-popup, .popup-menu { border-radius: 14px; border: 1px solid var(--border); box-shadow: var(--shadow-lg); overflow: hidden; }
+.tu-toast, .mail-snack, .undo-send { border-radius: 14px; box-shadow: var(--shadow-lg); background: #1f2638; }
+.undo-send { overflow: hidden; }
+.mail-state .mail-card { padding: 28px; }
+
+/* ---------- calendar ---------- */
+.cal-app { background: var(--bg); border-top: 0; }
+.cal-bar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 22px; }
+.cal-heading { font-size: 21px; }
+.cal-btn.active { background: var(--navy-tint); border-color: color-mix(in srgb, var(--navy, #b90f22) 35%, transparent); color: var(--navy-dark); }
+.cal-primary { background: var(--navy, #b90f22); border-color: var(--navy, #b90f22); color: #fff; }
+.cal-views .cal-btn:first-child { border-radius: 8px 0 0 8px; }
+.cal-views .cal-btn:last-child { border-radius: 0 8px 8px 0; }
+.cal-month, .cal-agenda { padding: 18px 22px 24px; }
+.cal-weekdays span { color: var(--text-faint); font-weight: 650; letter-spacing: .07em; }
+.cal-grid { gap: 6px; background: transparent; border: 0; }
+.cal-cell { border-radius: 12px; background: var(--surface); border: 1px solid var(--border); padding: 6px; transition: box-shadow .15s var(--ease), border-color .15s var(--ease), background-color .15s var(--ease); }
+.cal-cell:hover { box-shadow: var(--shadow); border-color: #d3d8e0; background: var(--surface); }
+.cal-cell.other { background: transparent; border-color: transparent; color: var(--text-faint); }
+.cal-cell.selected { outline: none; border-color: var(--navy, #b90f22); box-shadow: var(--ring); }
+.cal-cell.today .cal-num { background: var(--navy, #b90f22); color: #fff; }
+.cal-chip { border-left: 0; border-radius: 6px; padding: 2px 7px; background: var(--navy-tint); color: var(--navy-dark); font-weight: 550; }
+.cal-day { background: var(--surface); border-left: 1px solid var(--border); }
+.cal-day h4 { font-size: 17px; }
+.cal-event-btn { border-radius: 12px; border: 1px solid var(--border); border-left: 4px solid var(--navy, #b90f22); box-shadow: var(--shadow-sm); transition: box-shadow .15s var(--ease), background-color .15s var(--ease); }
+.cal-event-btn:hover { background: var(--surface); box-shadow: var(--shadow); }
+.cal-error { border-radius: 10px; margin: 12px 22px 0; }
+
+/* ---------- sign-in ---------- */
+body:has(#login) { background: radial-gradient(1200px 520px at 50% -10%, color-mix(in srgb, var(--navy, #b90f22) 9%, #fff) 0%, transparent 70%), var(--bg); }
+.site-header { min-height: 92px; border-bottom: 0; width: min(1120px, calc(100% - 48px)); }
+.university-logo { width: 168px; height: 66px; }
+.service-name { font-weight: 650; color: var(--text); font-size: 17px; letter-spacing: -.01em; }
+main:has(#login) { padding: 24px 20px 56px; align-items: flex-start; }
+#login {
+  max-width: 420px; padding: 36px 34px 30px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 22px; box-shadow: var(--shadow-lg), 0 1px 0 rgba(255, 255, 255, .6) inset;
+}
+#login h1 { font: 700 30px/1.15 var(--font); letter-spacing: -.025em; margin: 0 0 6px; }
+#login .intro { color: var(--text-muted); font-size: 15px; margin-bottom: 26px; }
+#login label { font-size: 13px; font-weight: 600; color: var(--text); margin: 16px 0 6px; }
+#login input { height: 48px; padding: 10px 14px; border-radius: 12px; font-size: 15px; background: var(--surface); }
+#login button#submit { min-height: 50px; border-radius: 12px; font-weight: 650; font-size: 15.5px; margin-top: 26px; box-shadow: 0 1px 2px rgba(16, 24, 40, .12), 0 8px 18px -8px color-mix(in srgb, var(--navy, #b90f22) 70%, transparent); }
+#login #error { padding: 10px 12px; border-radius: 10px; background: #fdecee; color: #8f1a24; }
+#login .help { margin-top: 18px; font-size: 13.5px; font-weight: 550; }
+footer { border-top: 0; color: var(--text-faint); }
+.prefs-bar button { border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--text-muted); font: 550 13px var(--font); box-shadow: var(--shadow-sm); }
+.prefs-bar button:hover { background: var(--bg); color: var(--text); border-color: #d3d8e0; }
+.skip-link { border-radius: 10px; }
+
+/* ---------- small screens ---------- */
+@media (max-width: 899px) {
+  .mail-main .page-title { min-height: 56px; padding: 6px 12px; }
+  .tu-header-logo { width: 96px; height: 40px; display: block; }
+  .mail-list { padding: 4px 6px 12px; }
+  #login { padding: 28px 22px 24px; border-radius: 20px; }
+  .site-header { min-height: 76px; }
+  .msg-card { border-radius: 14px; }
+  .thread { padding: 6px 10px 22px; }
+  .cal-grid { gap: 3px; }
+  .cal-cell { border-radius: 8px; padding: 4px; }
+}
+@media (max-width: 600px) {
+  body:has(#login) { background: var(--bg); }
+  #login { border-radius: 20px; box-shadow: var(--shadow); }
+}
+@media print { body { background: #fff; } }
+
+/* ---------- refinements ---------- */
+.card-action svg, .card-btn svg, .card-btn:first-child svg, .card-btn:last-child svg,
+.card-action.reply svg, .card-action.replyall svg, .card-action.forward svg { color: var(--text-muted); transition: color .15s var(--ease); }
+.card-action { color: var(--text-muted); }
+.card-action:hover, .card-btn:hover { background: var(--bg-2); color: var(--navy-dark); }
+.card-action:hover svg, .card-btn:hover svg { color: var(--navy, #b90f22); }
+.safety-banner { padding: 12px 14px; margin-top: 4px; margin-bottom: 12px; border-left-width: 4px; }
+.safety-banner strong { font-size: 14px; margin-bottom: 6px; }
+.safety-banner ul { list-style: disc; padding-left: 20px; margin: 0 0 8px; }
+.safety-banner li { margin: 2px 0; }
+.safety-banner > div { opacity: .85; font-size: 12.5px; }
+.translate-bar { margin-top: 4px; margin-bottom: 10px; }
+.card-head { gap: 12px; }
+.msg-card.unread { border-left: 1px solid var(--border); box-shadow: var(--shadow-sm), inset 3px 0 0 var(--navy, #b90f22); }
+
+/* Recipient fields: the box carries the border, the input inside stays plain. */
+.cmp-chips { border: 1px solid #d5dae3; border-radius: 10px; background: var(--surface); transition: border-color .15s var(--ease), box-shadow .15s var(--ease); }
+.cmp-chips:focus-within { border-color: var(--navy, #b90f22); box-shadow: var(--ring); }
+.cmp-chips input { border: 0 !important; box-shadow: none !important; background: transparent !important; border-radius: 0 !important; }
+.cmp-row label { color: var(--text-muted); font-weight: 600; font-size: 13px; }
+.cmp-from select { border-radius: 10px; }
+.cmp-editor-wrap { background: var(--surface); }
+@media (max-width: 899px) {
+  .cal-chip { height: 6px; padding: 0; font-size: 0; border-radius: 3px; background: var(--navy, #b90f22); }
+}

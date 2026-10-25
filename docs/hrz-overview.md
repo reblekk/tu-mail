@@ -1,6 +1,6 @@
-# TU Mail: overview for HRZ
+# TUDa Mail: overview for HRZ
 
-TU Mail is an open-source (MIT) web interface for TU Darmstadt mailboxes. It does not replace any HRZ service: it connects to the existing IMAP and SMTP servers with the user's own TU-ID and password, the same way any mail client does. Source: https://github.com/reblekk/tu-mail
+TUDa Mail is an open-source (MIT) web interface for TU Darmstadt mailboxes. It does not replace any HRZ service: it connects to the existing IMAP and SMTP servers with the user's own TU-ID and password, the same way any mail client does. Source: https://github.com/reblekk/tu-mail
 
 ## What users get
 

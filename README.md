@@ -1,4 +1,4 @@
-# TU Mail
+# TUDa Mail
 
 Open-source webmail client for TU Darmstadt mailboxes (MIT). It talks to the university's IMAP and SMTP servers on the user's behalf. It can run on one machine for one person, or be deployed by an operator (for example the HRZ) for many users.
 
@@ -23,7 +23,7 @@ Open http://127.0.0.1:3210 and sign in with your full email address, TU-ID (not 
 
 ## Deploying for other people (operator guide)
 
-TU Mail is built to run as **one instance** behind a TLS-terminating reverse proxy.
+TUDa Mail is built to run as **one instance** behind a TLS-terminating reverse proxy.
 
 ### Settings
 
@@ -86,7 +86,7 @@ Sessions are kept in the memory of the server process, together with the mailbox
 
 ## Threat model and privacy
 
-**What the server holds.** For each signed-in user: the mailbox password and profile, in process memory, for at most eight hours, removed on sign-out, expiry or restart. On disk, under `TU_MAIL_DATA_DIR`: the user's signature, contacts, send-as addresses and calendar events (events the person created, plus invitations they chose to add, kept as iCalendar text in plain files; the data directory therefore needs the same protection as the mail itself), and short records that stop a retried send from submitting a message twice (a hash of the message and the delivery result, not the message itself). Mailbox content is fetched live from the university servers and is not stored by TU Mail; the browser keeps what it displays in page memory.
+**What the server holds.** For each signed-in user: the mailbox password and profile, in process memory, for at most eight hours, removed on sign-out, expiry or restart. On disk, under `TU_MAIL_DATA_DIR`: the user's signature, contacts, send-as addresses and calendar events (events the person created, plus invitations they chose to add, kept as iCalendar text in plain files; the data directory therefore needs the same protection as the mail itself), and short records that stop a retried send from submitting a message twice (a hash of the message and the delivery result, not the message itself). Mailbox content is fetched live from the university servers and is not stored by TUDa Mail; the browser keeps what it displays in page memory.
 
 **Translation and privacy.** The Translate button appears only if the browser can translate on the device (the text then never leaves the machine) or the operator configured `TRANSLATE_URL`. In the second case the text of the message being translated, and nothing else, is sent from the server to that translation server, so choose one you trust and run it inside your own network. The server limits each request (300 parts, 30,000 characters) and each person to 40 requests per 10 minutes, and does not log or keep the text.
 

@@ -20,7 +20,8 @@
     for (const el of document.querySelectorAll('.help')) if (b.helpUrl) el.href = b.helpUrl;
     const footer = document.querySelector('body > footer');
     if (footer && b.footer) footer.textContent = b.footer;
-    document.title = document.title.replace(/TU Mail/g, b.name);
+    window.TuBrandName = b.name;
+    document.title = document.title.replace(/TUDa Mail/g, b.name);
     window.dispatchEvent(new Event('tu-brand-ready'));
   }
   function start() {

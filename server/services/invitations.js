@@ -22,7 +22,7 @@ function reply(content, email, status) {
   const { calendar, event, attendee, summary } = parse(content, email);
   if (!summary.canRespond) throw error('This invitation cannot be answered for the current account.');
   const result = new ICAL.Component(['vcalendar', [], []]);
-  result.updatePropertyWithValue('version', '2.0'); result.updatePropertyWithValue('prodid', '-//TU Mail//Meeting reply//EN'); result.updatePropertyWithValue('method', 'REPLY');
+  result.updatePropertyWithValue('version', '2.0'); result.updatePropertyWithValue('prodid', '-//TUDa Mail//Meeting reply//EN'); result.updatePropertyWithValue('method', 'REPLY');
   const clone = p => new ICAL.Property(JSON.parse(JSON.stringify(p.toJSON())));
   const response = new ICAL.Component(['vevent', [], []]);
   for (const name of ['uid', 'sequence', 'recurrence-id', 'dtstart', 'dtend', 'summary', 'organizer']) { const p = event.getFirstProperty(name); if (p) response.addProperty(clone(p)); }

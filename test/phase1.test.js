@@ -36,7 +36,7 @@ test('German: exact strings, patterns, whitespace and passthrough',()=>{
 
 test('German dictionary is complete for the static pages and has no dead entries',()=>{
  i18n._reset('de');
- const ignore=new Set(['TU Mail','Technische Universität Darmstadt','TU-ID','Webmail','Bcc','Cc','Normal']);
+ const ignore=new Set(['TUDa Mail','Technische Universität Darmstadt','TU-ID','Webmail','Bcc','Cc','Normal']);
  const missing=[];
  for(const file of ['index.html','mail.html','calendar.html']){
   const html=read(file);
@@ -95,12 +95,12 @@ test('service worker never touches the API and the shortcuts file lists every do
 const brand=require('../server/services/brand');
 test('brand: defaults, validation and derived colours',()=>{
  const d=brand.load({});
- assert.equal(d.name,'TU Mail');assert.equal(d.color,'#b90f22');assert.equal(d.logo,null);
+ assert.equal(d.name,'TUDa Mail');assert.equal(d.color,'#b90f22');assert.equal(d.logo,null);
  assert.match(d.colorDark,/^#[0-9a-f]{6}$/);assert.match(d.colorTint,/^#[0-9a-f]{6}$/);
  assert.notEqual(d.colorDark,d.color);
  const custom=brand.load({BRAND_NAME:'Uni Mail',BRAND_PRIMARY_COLOR:'#003366',BRAND_HELP_URL:'https://help.example.edu/mail',BRAND_FOOTER:'Run by IT'});
  assert.deepEqual([custom.name,custom.color,custom.helpUrl,custom.footer],['Uni Mail','#003366','https://help.example.edu/mail','Run by IT']);
- assert.equal(brand.load({BRAND_NAME:'x'.repeat(41)}).name,'TU Mail','over-long names fall back');
+ assert.equal(brand.load({BRAND_NAME:'x'.repeat(41)}).name,'TUDa Mail','over-long names fall back');
  assert.equal(brand.load({BRAND_NAME:'A\nB'}).name,'A B','control characters are stripped');
  assert.throws(()=>brand.load({BRAND_PRIMARY_COLOR:'red'}),/BRAND_PRIMARY_COLOR/);
  assert.throws(()=>brand.load({BRAND_PRIMARY_COLOR:'#12345; background:url(x)'}),/BRAND_PRIMARY_COLOR/);
@@ -154,7 +154,7 @@ test('server: brand endpoint, manifest, logo and service worker headers',async()
  fs.writeFileSync(path.join(data,'brand','logo.svg'),'<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>');
  const plain=await start({});
  const b=await call(plain,{url:'/api/brand'});
- assert.equal(b.status,200);assert.equal(b.json().name,'TU Mail');assert.equal(b.json().logoUrl,null);assert.equal(b.headers['cache-control'],'no-store');
+ assert.equal(b.status,200);assert.equal(b.json().name,'TUDa Mail');assert.equal(b.json().logoUrl,null);assert.equal(b.headers['cache-control'],'no-store');
  assert.equal((await call(plain,{url:'/brand/logo'})).status,404);
  const branded=await start({TU_MAIL_DATA_DIR:data,BRAND_NAME:'Uni Mail',BRAND_PRIMARY_COLOR:'#003366',BRAND_LOGO:'logo.svg'});
  const bb=(await call(branded,{url:'/api/brand'})).json();

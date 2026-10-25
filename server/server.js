@@ -112,7 +112,7 @@ if (require.main === module) {
   }
   const server = app.listen(config.port, config.bindHost, () => {
     const where = config.publicUrl ? config.publicUrl.origin : 'http://127.0.0.1:' + config.port;
-    console.log('TU Mail: ' + where + ' (listening on ' + config.bindHost + ':' + config.port + ')');
+    console.log('TUDa Mail: ' + where + ' (listening on ' + config.bindHost + ':' + config.port + ')');
   });
   // Finish in-flight requests, then exit; sessions are memory-only so nothing else needs saving.
   for (const signal of ['SIGTERM', 'SIGINT']) process.on(signal, () => server.close(() => process.exit(0)));
