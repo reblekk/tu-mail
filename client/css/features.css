@@ -49,3 +49,6 @@
 /* The Translate button only appears when this browser or the server can translate. */
 .card-translate { display: none; }
 body.can-translate .card-translate { display: inline-flex; }
+
+/* Links in the folder sidebar look like the buttons next to them. */
+a.mail-signature-link { display: flex; align-items: center; gap: 8px; text-decoration: none; color: inherit; }

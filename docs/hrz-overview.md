@@ -17,7 +17,8 @@ Resource needs are small: the server holds only a session record per signed-in u
 | Data | Where | How long |
 | --- | --- | --- |
 | Mailbox password and profile | Server memory only | Up to 8 hours; removed on sign-out, expiry or restart |
-| Signature and contacts | Data directory, per user | Until the user deletes them |
+| Signature, contacts, send-as addresses | Data directory, per user | Until the user deletes them |
+| Calendar events (created by the user, or invitations they chose to add) | Data directory, per user, as iCalendar text | Until the user deletes them |
 | Send-attempt records (message hash and delivery result, to prevent double sends) | Data directory | Small files; can be cleared by the operator |
 | Logs: time, method, path, status, duration, client address, hashed user identifier | Standard output | Operator's retention policy |
 
@@ -27,6 +28,8 @@ Never stored or logged: passwords on disk, cookies, request bodies, query string
 
 - **Translation to English** is off unless HRZ configures a translation server. Browsers that translate on the device never contact it. If configured, only the text of the message being translated goes from the server to that server.
 - **Send-as addresses** let a person write from other addresses on the university domain they have saved. Messages are still submitted through their own account.
+- **Calendar** keeps only what the person adds. Reading an invitation does not add it.
+- **Desktop notifications** work only while a Mail tab is open; the server keeps no credentials in the background. They are off by default and the person chooses whether they show the sender and subject.
 - **Search filters, saved searches, reminders and the undo-send delay** are stored in the user's browser only.
 
 ## Security measures

@@ -294,7 +294,7 @@ test('every client script compiles, and the offline shell lists every local file
  for(const f of fs.readdirSync(path.join(client,'js')))new vm.Script(read('js/'+f),{filename:f});
  new vm.Script(read('sw.js'),{filename:'sw.js'});
  const sw=read('sw.js');
- for(const page of ['index.html','mail.html']){
+ for(const page of ['index.html','mail.html','calendar.html']){
   for(const m of read(page).matchAll(/(?:src|href)="((?:css|js|assets)\/[^"]+)"/g)){
    if(m[1].endsWith('.svg')||m[1].endsWith('.png')&&!m[1].includes('icon-192'))continue;
    assert.ok(sw.includes("'/"+m[1]+"'"),page+' loads '+m[1]+' but the service worker does not cache it');

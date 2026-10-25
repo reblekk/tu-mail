@@ -27,7 +27,7 @@
 <link rel="stylesheet" href="css/a11y.css" />
 <link rel="stylesheet" href="css/print.css" media="print" />
 </head>
-<body>
+<body data-page="mail">
   <a class="skip-link" href="#main">Skip to main content</a>
   <div class="app-shell">
 
@@ -95,6 +95,10 @@
             </button>
           </div>
           <ul class="mail-folder-list" id="mail-folder-list"></ul>
+          <a class="mail-signature-link" id="open-calendar" href="calendar.html">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            <span>Calendar</span>
+          </a>
           <button type="button" class="mail-signature-link" id="mail-settings-btn">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
             Signature
@@ -254,6 +258,7 @@
   <script src="js/safety.js"></script>
   <script src="js/undo-send.js"></script>
   <script src="js/reminders.js"></script>
+  <script src="js/notify.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/mail-app.js"></script>
   <script src="js/mail-cache.js"></script>

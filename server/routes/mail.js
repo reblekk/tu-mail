@@ -8,6 +8,7 @@ const { verifyToken } = require('../middleware/auth');
 const { parseFilters } = require('../services/search-query');
 const identities = require('../services/identities');
 const translateService = require('../services/translate');
+const calendar = require('../services/calendar');
 const { allowedEmail } = require('../services/account-profiles');
 
 const router = express.Router();
@@ -381,6 +382,29 @@ router.delete('/contacts/:id', async (req,res) => { try { res.json(await contact
 router.get('/messages/:uid/invitation/:index', withMailbox(async (req,creds) => {
  const file=await imap.readAttachment(creds,{folder:folderParam(req.query.folder),uid:uidParam(req.params.uid),index:Number(req.params.index)});
  return invitations.inspect(file.content,req.user.email);
+}));
+// ---- calendar: events live per person on the server; invitations are added only on request
+const eventId = (value) => {
+  if (!/^[0-9a-f]{24}$/.test(String(value))) throw Object.assign(new Error('Event not found.'), { status: 404 });
+  return String(value);
+};
+const calendarRoute = (handler) => async (req, res) => {
+  try { await handler(req, res); } catch (err) { sendError(res, err); }
+};
+router.get('/calendar/events', calendarRoute(async (req, res) => res.json({ events: await calendar.list(req.user.email, String(req.query.from || ''), String(req.query.to || '')) })));
+router.post('/calendar/events', calendarRoute(async (req, res) => res.json(await calendar.create(req.user.email, req.body || {}))));
+router.get('/calendar/events/:id', calendarRoute(async (req, res) => res.json(await calendar.details(req.user.email, eventId(req.params.id)))));
+router.delete('/calendar/events/:id', calendarRoute(async (req, res) => res.json(await calendar.remove(req.user.email, eventId(req.params.id)))));
+router.get('/calendar/export.ics', calendarRoute(async (req, res) => {
+  res.set('Content-Type', 'text/calendar; charset=utf-8');
+  res.set('Content-Disposition', dispositionHeader('calendar.ics', 'attachment'));
+  res.set('X-Content-Type-Options', 'nosniff');
+  res.set('Cache-Control', 'private, no-store');
+  res.send(await calendar.exportIcs(req.user.email));
+}));
+router.post('/messages/:uid/invitation/:index/calendar', withMailbox(async (req, creds) => {
+  const file = await imap.readAttachment(creds, { folder: folderParam(req.body.folder), uid: uidParam(req.params.uid), index: Number(req.params.index) });
+  return calendar.addInvitation(req.user.email, file.content);
 }));
 router.post('/messages/:uid/invitation/:index/reply', withMailbox(async (req,creds) => {
  const file=await imap.readAttachment(creds,{folder:folderParam(req.body.folder),uid:uidParam(req.params.uid),index:Number(req.params.index)});

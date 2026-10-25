@@ -38,7 +38,7 @@ test('German dictionary is complete for the static pages and has no dead entries
  i18n._reset('de');
  const ignore=new Set(['TU Mail','Technische Universität Darmstadt','TU-ID','Webmail','Bcc','Cc','Normal']);
  const missing=[];
- for(const file of ['index.html','mail.html']){
+ for(const file of ['index.html','mail.html','calendar.html']){
   const html=read(file);
   const texts=[...html.matchAll(/>([^<>{}]+)</g)].map(m=>m[1]).concat([...html.matchAll(/\b(?:placeholder|title|aria-label|alt)="([^"]+)"/g)].map(m=>m[1]));
   for(const raw of texts){
@@ -50,7 +50,7 @@ test('German dictionary is complete for the static pages and has no dead entries
  }
  assert.deepEqual(missing,[],'untranslated static text');
  // Every entry must still correspond to text somewhere in the client or the server.
- const sources=fs.readdirSync(path.join(client,'js')).filter(f=>f!=='i18n-de.js').map(f=>read('js/'+f)).concat([read('index.html'),read('mail.html')],
+ const sources=fs.readdirSync(path.join(client,'js')).filter(f=>f!=='i18n-de.js').map(f=>read('js/'+f)).concat([read('index.html'),read('mail.html'),read('calendar.html')],
   fs.readFileSync(path.join(__dirname,'../server/server.js'),'utf8'),fs.readFileSync(path.join(__dirname,'../server/routes/mail.js'),'utf8')).join('\n');
  const serverFolderNames=new Set(['Sent Items','Deleted Items','Junk','Trash','Inbox','Drafts','Sent','Archive','Spam','Message sent','Message']);
  const dead=Object.keys(de).filter(k=>!sources.includes(k)&&!sources.includes(k.replace(/'/g,"\\'"))&&!serverFolderNames.has(k));
