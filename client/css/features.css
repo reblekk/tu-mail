@@ -1,0 +1,51 @@
+/* Phase 2 features: filters, undo send, reminders, safety hints, identities, translation. */
+
+/* ---- search filters */
+.mail-filter-panel { padding: 10px 12px 12px; border-top: 1px solid var(--border); background: var(--bg); }
+.filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 10px; }
+.filter-grid label, .saved-new, .idn-field { font-size: 12px; color: var(--text-muted); }
+.filter-grid label { display: flex; flex-direction: column; gap: 3px; }
+.filter-grid input, .saved-new input { padding: 7px 8px; border: 1px solid #bbb; border-radius: 2px; font: 13px var(--font); background: #fff; color: var(--text); min-width: 0; }
+.filter-checks { display: flex; gap: 16px; margin: 10px 0; font-size: 13px; }
+.filter-actions { display: flex; gap: 8px; }
+.saved-searches { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); }
+.saved-head { font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+.saved-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.saved-row { display: inline-flex; align-items: center; }
+.saved-del { width: 24px; height: 24px; font-size: 16px; line-height: 1; }
+.saved-new { display: flex; gap: 8px; margin-top: 10px; }
+.saved-new input { flex: 1; }
+
+/* ---- undo send */
+.undo-send { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); z-index: 20001; display: flex; align-items: center; gap: 14px; padding: 12px 16px; background: #303030; color: #fff; border-radius: 2px; box-shadow: var(--shadow); max-width: calc(100% - 32px); }
+.undo-send button { border: 0; background: none; color: #ffb3bb; font: 700 14px var(--font); cursor: pointer; padding: 4px 6px; }
+.undo-send .undo-bar { position: absolute; left: 0; bottom: 0; height: 3px; background: #ffb3bb; width: 100%; transform-origin: left; }
+
+/* ---- reminders */
+.remind-menu { display: flex; flex-direction: column; gap: 6px; margin: 10px 0; }
+.remind-menu button { text-align: left; }
+.reminder-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.reminder-row .rem-main { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.reminder-row .rem-when { display: block; font-size: 12px; color: var(--text-muted); }
+.reminder-row.due .rem-when { color: var(--navy); font-weight: 700; }
+.reminder-badge { display: inline-block; margin-left: 6px; padding: 0 6px; border-radius: 9px; background: var(--navy); color: #fff; font-size: 11px; }
+
+/* ---- safety hints */
+.safety-banner { margin: 0 0 10px; padding: 10px 12px; border: 1px solid #e0b34a; border-left-width: 4px; background: #fff8e6; color: #5a4300; font-size: 13px; line-height: 1.45; }
+.safety-banner strong { display: block; margin-bottom: 4px; }
+.safety-banner ul { margin: 0; padding-left: 18px; }
+.safety-banner.high { border-color: #c0392b; background: #fdeceb; color: #7a1d14; }
+
+/* ---- identities, translation */
+.cmp-from-row select { max-width: 100%; padding: 5px 6px; border: 1px solid var(--border); border-radius: 2px; background: #fff; color: var(--text); font: 13px var(--font); }
+.idn-row { display: flex; gap: 6px; align-items: center; margin: 6px 0; }
+.idn-row input { flex: 1; min-width: 0; }
+.translate-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 8px; padding: 8px 12px; background: var(--bg-2); border-left: 4px solid var(--navy); font-size: 13px; }
+.translate-bar button { border: 1px solid var(--border); background: #fff; color: var(--navy-dark); padding: 4px 10px; cursor: pointer; font: 13px var(--font); }
+.translate-bar .tr-note { color: var(--text-muted); flex: 1 1 200px; }
+
+@keyframes undo-countdown { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+
+/* The Translate button only appears when this browser or the server can translate. */
+.card-translate { display: none; }
+body.can-translate .card-translate { display: inline-flex; }

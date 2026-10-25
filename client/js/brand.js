@@ -2,6 +2,7 @@
 // works unbranded if the request fails.
 (function () {
   function apply(b) {
+    window.TuFeatures = b.features || {};
     const root = document.documentElement;
     root.style.setProperty('--navy', b.color);
     root.style.setProperty('--navy-dark', b.colorDark);
@@ -11,7 +12,7 @@
     root.style.setProperty('--emerald-tint', b.colorTint);
     root.style.setProperty('--accent', b.color);
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta && root.getAttribute('data-theme') !== 'dark') meta.setAttribute('content', b.color);
+    if (meta) meta.setAttribute('content', b.color);
     for (const img of document.querySelectorAll('.tu-header-logo, .university-logo')) {
       if (b.logoUrl) { img.src = b.logoUrl; img.alt = b.name; }
     }
@@ -20,6 +21,7 @@
     const footer = document.querySelector('body > footer');
     if (footer && b.footer) footer.textContent = b.footer;
     document.title = document.title.replace(/TU Mail/g, b.name);
+    window.dispatchEvent(new Event('tu-brand-ready'));
   }
   function start() {
     fetch('/api/brand', { credentials: 'same-origin' }).then((r) => (r.ok ? r.json() : null)).then((b) => { if (b) apply(b); }).catch(() => {});

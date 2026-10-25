@@ -19,6 +19,17 @@ class MailSendError extends Error {
   }
 }
 
+// The From the reader sees: the account itself, or a saved send-as identity chosen by the route.
+function fromHeader(message, creds) {
+  const address = message.fromAddress || creds.email;
+  const name = String(message.fromName || '').replace(/[\r\n"<>]/g, ' ').trim();
+  return name ? { name, address } : address;
+}
+// When From is not the signed-in account, say which account actually submitted the message.
+function senderHeader(message, creds) {
+  return message.fromAddress && message.fromAddress.toLowerCase() !== String(creds.email).toLowerCase() ? { sender: creds.email } : {};
+}
+
 function smtpOptions(creds) {
   const host = process.env.MAIL_SMTP_HOST || imap.mailHost(creds.email);
   const secure = process.env.MAIL_SMTP_SECURE !== 'false';
@@ -190,7 +201,8 @@ async function sendMessage(creds, message) {
   const html = wrapBody(inline.html);
   const domain = String(creds.email).split('@')[1];
   const mail = {
-    from: message.fromName ? { name: String(message.fromName).replace(/[\r\n"<>]/g, ' ').trim(), address: creds.email } : creds.email,
+    from: fromHeader(message, creds),
+    ...senderHeader(message, creds),
     to,
     cc,
     bcc,
@@ -259,7 +271,8 @@ async function saveDraft(creds, message, { replaceUid } = {}) {
   const domain = String(creds.email).split('@')[1];
   const oneLine = (v) => String(v || '').replace(/[\r\n]+/g, ' ').trim().slice(0, 998);
   const mail = {
-    from: message.fromName ? { name: String(message.fromName).replace(/[\r\n"<>]/g, ' ').trim(), address: creds.email } : creds.email,
+    from: fromHeader(message, creds),
+    ...senderHeader(message, creds),
     to: lenient(message.to),
     cc: lenient(message.cc),
     bcc: lenient(message.bcc),
@@ -286,4 +299,4 @@ async function saveDraft(creds, message, { replaceUid } = {}) {
   return imap.appendDraft(creds, raw, { replaceUid });
 }
 
-module.exports = { sendMessage, saveDraft, sendingAllowance, MailSendError, htmlToText, inlineDataImages, EMAIL_PATTERN };
+module.exports = { sendMessage, saveDraft, sendingAllowance, MailSendError, htmlToText, inlineDataImages, EMAIL_PATTERN, fromHeader, senderHeader };

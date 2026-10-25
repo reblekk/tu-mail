@@ -21,6 +21,7 @@ function load(env = process.env) {
   if (env.METRICS_TOKEN && env.METRICS_TOKEN.length < 16) throw new Error('METRICS_TOKEN must be at least 16 characters.');
   return {
     brand: require('./services/brand').load(env),
+    translate: require('./services/translate').fromEnv(env),
     metricsToken: env.METRICS_TOKEN || null,
     publicUrl,
     port,

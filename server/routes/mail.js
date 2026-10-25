@@ -5,6 +5,10 @@ const imap = require('../services/mail-imap');
 const smtp = require('../services/mail-smtp');
 const mailSettings = require('../services/mail-settings');
 const { verifyToken } = require('../middleware/auth');
+const { parseFilters } = require('../services/search-query');
+const identities = require('../services/identities');
+const translateService = require('../services/translate');
+const { allowedEmail } = require('../services/account-profiles');
 
 const router = express.Router();
 const sendGuard = require('../services/send-guard');
@@ -162,6 +166,7 @@ router.get('/messages', withMailbox((req, creds) => {
     q: String(req.query.q || '').trim().slice(0, 200),
     scope: req.query.scope === 'all' ? 'all' : 'headers',
     unreadOnly: req.query.unread === '1',
+    filters: parseFilters(req.query),
   });
 }));
 
@@ -290,8 +295,10 @@ router.post('/send', receiveMessage, async (req, res) => {
     const mode = ['reply', 'replyall', 'forward'].includes(body.mode) ? body.mode : 'new';
     const attachments = await gatherAttachments(req, creds);
 
+    const from = identities.resolve((await mailSettings.getSettings(req.user.email)).identities, body.fromAddress, { name: req.user.name || '', address: req.user.email });
     const outgoing = {
-      fromName: req.user.name || '',
+      fromName: from.name,
+      fromAddress: from.address,
       to: jsonField(body.to, []),
       cc: jsonField(body.cc, []),
       bcc: jsonField(body.bcc, []),
@@ -333,8 +340,10 @@ router.post('/draft', receiveMessage, async (req, res) => {
   try {
     const body = req.body || {};
     const attachments = await gatherAttachments(req, creds);
+    const from = identities.resolve((await mailSettings.getSettings(req.user.email)).identities, body.fromAddress, { name: req.user.name || '', address: req.user.email });
     const saved = await smtp.saveDraft(creds, {
-      fromName: req.user.name || '',
+      fromName: from.name,
+      fromAddress: from.address,
       mode: body.mode,
       sourceFolder: body.sourceFolder,
       sourceUid: body.sourceUid,
@@ -396,7 +405,60 @@ router.put('/settings', async (req, res) => {
   }
 });
 
+// Translate message text to English through the operator's translation server, if there is one.
+const translateUse = new Map();
+router.post('/translate', async (req, res) => {
+  const config = req.app.get('translate');
+  if (!config) return res.status(501).json({ error: 'Translation is not set up on this server.' });
+  const now = Date.now();
+  const recent = (translateUse.get(req.user.userId) || []).filter((t) => t > now - 600000);
+  if (recent.length >= 40) return res.status(429).json({ error: 'Too many translation requests. Try again in a few minutes.' });
+  recent.push(now);
+  translateUse.set(req.user.userId, recent);
+  if (translateUse.size > 5000) translateUse.delete(translateUse.keys().next().value);
+  try {
+    res.json(await translateService.translateTexts(config, (req.body || {}).texts));
+  } catch (err) {
+    sendError(res, err);
+  }
+});
+
+router.get('/identities', async (req, res) => {
+  try {
+    const settings = await mailSettings.getSettings(req.user.email);
+    res.json({ own: { name: req.user.name || '', address: req.user.email }, identities: settings.identities || [] });
+  } catch (err) {
+    sendError(res, err);
+  }
+});
+
+router.put('/identities', async (req, res) => {
+  try {
+    const { identities: clean } = identities.sanitize((req.body || {}).identities, { ownAddress: req.user.email, isAllowed: allowedEmail });
+    const saved = await mailSettings.saveIdentities(req.user.email, clean);
+    res.json({ own: { name: req.user.name || '', address: req.user.email }, identities: saved.identities });
+  } catch (err) {
+    sendError(res, err);
+  }
+});
+
 router.get('/send-allowance', (req, res) => res.json(smtp.sendingAllowance(req.user.email)));
+
+// Download the message as an .eml file.
+router.get('/messages/:uid/export', async (req, res) => {
+  const creds = mailSession.getCredentials(req);
+  if (!creds) return res.status(409).json({ code: 'MAIL_AUTH', error: 'Mailbox sign-in required' });
+  try {
+    const file = await imap.exportMessage(creds, { folder: folderParam(req.query.folder), uid: uidParam(req.params.uid) });
+    res.set('Content-Type', 'message/rfc822');
+    res.set('Content-Disposition', dispositionHeader(file.filename, 'attachment'));
+    res.set('X-Content-Type-Options', 'nosniff');
+    res.set('Cache-Control', 'private, no-store');
+    return res.send(file.content);
+  } catch (err) {
+    return sendError(res, err);
+  }
+});
 
 router.get('/messages/:uid', withMailbox((req, creds) => imap.readMessage(creds, {
   folder: folderParam(req.query.folder),

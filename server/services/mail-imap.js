@@ -4,6 +4,7 @@
 const { ImapFlow } = require('imapflow');
 const { simpleParser } = require('mailparser');
 const sanitizeHtml = require('sanitize-html');
+const { buildQuery, hasFilters } = require('./search-query');
 
 class MailAuthError extends Error {
   constructor(message) {
@@ -331,7 +332,7 @@ function threadIdsOf(env, headers) {
   return [...new Set(ids.map((i) => i.trim()))].slice(0, 12);
 }
 
-async function listFolderMessages(creds, { folder, page = 1, pageSize = 40, q = '', scope = 'headers', unreadOnly = false }) {
+async function listFolderMessages(creds, { folder, page = 1, pageSize = 40, q = '', scope = 'headers', unreadOnly = false, filters = {} }) {
   return withClient(creds, async (client) => {
     const lock = await client.getMailboxLock(folder, { readOnly: true });
     try {
@@ -339,14 +340,8 @@ async function listFolderMessages(creds, { folder, page = 1, pageSize = 40, q = 
       let range;
       let byUid = false;
 
-      if (q || unreadOnly) {
-        const query = {};
-        if (unreadOnly) query.seen = false;
-        if (q) {
-          const terms = [{ from: q }, { to: q }, { subject: q }];
-          if (scope === 'all') terms.push({ body: q });
-          query.or = terms;
-        }
+      const query = buildQuery({ q, scope, unreadOnly, filters });
+      if (query) {
         const found = (await client.search(query, { uid: true })) || [];
         const uids = found.slice().sort((a, b) => b - a);
         total = uids.length;
@@ -380,7 +375,7 @@ async function listFolderMessages(creds, { folder, page = 1, pageSize = 40, q = 
 // a chain's row can show its newest message even when that's your reply (or their answer).
 async function listMessages(creds, options) {
   const result = await listFolderMessages(creds, options);
-  if (options.q || options.unreadOnly || (options.page || 1) !== 1) return result;
+  if (options.q || options.unreadOnly || hasFilters(options.filters) || (options.page || 1) !== 1) return result;
   try {
     const related = await withClient(creds, async (client) => {
       const all = await cachedFolderList(creds, client);
@@ -1068,6 +1063,33 @@ async function readAttachment(creds, { folder, uid, index }) {
   });
 }
 
+// The message exactly as stored on the server (an .eml file), for saving or archiving elsewhere.
+function emlName(source, uid) {
+  const head = source.subarray(0, Math.min(source.length, 16384)).toString('latin1').split(/\r?\n\r?\n/)[0].replace(/\r?\n[ \t]+/g, ' ');
+  let subject = (/^subject:\s*(.*)$/im.exec(head) || [])[1] || '';
+  // Encoded words ("=?utf-8?B?...?=") are common in subjects; decode what we can for a readable name.
+  subject = subject.replace(/=\?([\w-]+)\?([bq])\?([^?]*)\?=/gi, (m, charset, enc, text) => {
+    try {
+      const bytes = enc.toLowerCase() === 'b' ? Buffer.from(text, 'base64') : Buffer.from(text.replace(/_/g, ' ').replace(/=([0-9a-f]{2})/gi, (x, h) => String.fromCharCode(parseInt(h, 16))), 'latin1');
+      return new TextDecoder(charset).decode(bytes);
+    } catch (e) { return ''; }
+  });
+  const slug = subject.replace(/[\u0000-\u001f\u007f<>:"/\\|?*]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80) || 'message';
+  return `${slug} (${uid}).eml`;
+}
+
+async function exportMessage(creds, { folder, uid }) {
+  return withClient(creds, async (client) => {
+    const lock = await client.getMailboxLock(folder, { readOnly: true });
+    try {
+      const { source } = await fetchSource(client, uid);
+      return { filename: emlName(source, uid), content: source };
+    } finally {
+      lock.release();
+    }
+  });
+}
+
 // ---- flags ---------------------------------------------------------------------------------
 
 // ---- organizing: move, delete, archive, spam, folders -----------------------------------------
@@ -1558,6 +1580,8 @@ module.exports = {
   previews,
   readMessage,
   readAttachment,
+  exportMessage,
+  emlName,
   setFlags,
   sanitizeEmailHtml,
 };

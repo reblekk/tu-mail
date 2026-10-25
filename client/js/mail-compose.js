@@ -513,6 +513,8 @@
     form.append('cc', JSON.stringify(c.fields.cc.values()));
     form.append('bcc', JSON.stringify(c.fields.bcc.values()));
     form.append('subject', $c('cmp-subject').value.trim());
+    const fromAddress = window.MailIdentities ? window.MailIdentities.chosen() : '';
+    if (fromAddress) form.append('fromAddress', fromAddress);
     form.append('html', editorBodyHtml());
     if (c.prep && c.mode !== 'forward') {
       form.append('inReplyTo', c.prep.inReplyTo || '');
@@ -759,6 +761,7 @@
     c.uid = options.uid || null;
     $c('cmp-title').textContent = TITLES[mode] || 'New message';
     $c('cmp-from').textContent = user.name ? `${user.name} <${user.email}>` : user.email;
+    if (window.MailIdentities) window.MailIdentities.decorate($c('cmp-from')).catch(() => {});
     $c('compose-overlay').hidden = false;
     document.documentElement.classList.add('cmp-open');
 
@@ -970,6 +973,17 @@
     if (typeof window.mailPendingAdd === 'function') window.mailPendingAdd(pending, wasReply ? { folder, uid } : null);
     $c('compose-overlay').hidden = true;
     document.documentElement.classList.remove('cmp-open');
+
+    // A short, cancellable pause before the message really leaves (see undo-send.js).
+    if (window.UndoSend && !(await window.UndoSend.wait())) {
+      if (typeof window.mailPendingDone === 'function') window.mailPendingDone(pending);
+      $c('compose-overlay').hidden = false;
+      document.documentElement.classList.add('cmp-open');
+      setSending(false);
+      $c('cmp-status').textContent = 'Sending cancelled — your message is back in the editor';
+      toast('Sending cancelled — your message is back in the editor');
+      return;
+    }
 
     try {
       const result = await mailFetch('/api/mail/send', { method: 'POST', body: form });

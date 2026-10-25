@@ -23,6 +23,12 @@ Resource needs are small: the server holds only a session record per signed-in u
 
 Never stored or logged: passwords on disk, cookies, request bodies, query strings, folder names, message content. No analytics, tracking or third-party requests.
 
+## Optional features that touch data
+
+- **Translation to English** is off unless HRZ configures a translation server. Browsers that translate on the device never contact it. If configured, only the text of the message being translated goes from the server to that server.
+- **Send-as addresses** let a person write from other addresses on the university domain they have saved. Messages are still submitted through their own account.
+- **Search filters, saved searches, reminders and the undo-send delay** are stored in the user's browser only.
+
 ## Security measures
 
 - TLS only in deployment mode (HSTS, `Secure`, `HttpOnly`, `SameSite=Strict` cookie).

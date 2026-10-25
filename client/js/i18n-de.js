@@ -75,9 +75,6 @@
     'Sign out of all accounts': 'Von allen Konten abmelden',
     'Could not sign out. Try again.': 'Abmeldung fehlgeschlagen. Bitte erneut versuchen.',
     'Close or save your message before switching accounts.': 'Schließen oder speichern Sie Ihre Nachricht, bevor Sie das Konto wechseln.',
-    'Theme: system': 'Design: System',
-    'Theme: light': 'Design: Hell',
-    'Theme: dark': 'Design: Dunkel',
     'Language: English': 'Sprache: Englisch',
     'Language: Deutsch': 'Sprache: Deutsch',
     'Keyboard shortcuts': 'Tastenkürzel',
@@ -310,6 +307,67 @@
     'Back to the list, or close': 'Zurück zur Liste oder schließen',
     'Go to Inbox': 'Zum Posteingang',
     'Show this help': 'Diese Hilfe anzeigen',
+    'then': 'dann',
+    'Remind me': 'Erinnern',
+    'Export as .eml': 'Als .eml exportieren',
+
+    // Search filters and saved searches
+    'Filters': 'Filter',
+    'After': 'Nach',
+    'Before': 'Vor',
+    'Has attachment': 'Mit Anhang',
+    'Apply filters': 'Filter anwenden',
+    'Reset': 'Zurücksetzen',
+    'Saved searches': 'Gespeicherte Suchen',
+    'Name this search': 'Suche benennen',
+    'Save this search': 'Suche speichern',
+    'Delete saved search': 'Gespeicherte Suche löschen',
+    'Could not save in this browser.': 'Speichern in diesem Browser nicht möglich.',
+    'Name this search first.': 'Geben Sie der Suche zuerst einen Namen.',
+    'Nothing to save yet — set a search or a filter.': 'Noch nichts zu speichern — legen Sie eine Suche oder einen Filter fest.',
+    'You can keep up to 20 saved searches.': 'Sie können bis zu 20 Suchen speichern.',
+    'Search saved': 'Suche gespeichert',
+    'Nothing in this folder matches these filters.': 'Nichts in diesem Ordner entspricht diesen Filtern.',
+
+    // Undo send
+    'Undo send: off': 'Senden rückgängig: aus',
+    'Sending cancelled — your message is back in the editor': 'Senden abgebrochen — Ihre Nachricht ist wieder im Editor',
+
+    // Reminders
+    'Remind me (B)': 'Erinnern (B)',
+    'Pick a date and time': 'Datum und Uhrzeit wählen',
+    'Set reminder': 'Erinnerung setzen',
+    'Pick a time in the future.': 'Wählen Sie einen Zeitpunkt in der Zukunft.',
+    'Reminders': 'Erinnerungen',
+    'No reminders.': 'Keine Erinnerungen.',
+    'Open': 'Öffnen',
+    'Dismiss': 'Verwerfen',
+
+    // Safety hints
+    'Be careful with this message': 'Vorsicht bei dieser Nachricht',
+    'These are automatic hints, not proof. Do not enter passwords or open attachments unless you are sure of the sender.': 'Dies sind automatische Hinweise, kein Beweis. Geben Sie keine Passwörter ein und öffnen Sie keine Anhänge, wenn Sie sich beim Absender nicht sicher sind.',
+
+    // Send-as addresses
+    'Send-as addresses': 'Absenderadressen',
+    'Other addresses you may write from. Replies go to the address you pick; your mailbox still sends the message.': 'Weitere Adressen, von denen Sie schreiben dürfen. Antworten gehen an die gewählte Adresse; die Nachricht wird weiterhin über Ihr Postfach gesendet.',
+    'Add address': 'Adresse hinzufügen',
+    'Save': 'Speichern',
+    'You can save up to 5 send-as addresses.': 'Sie können bis zu 5 Absenderadressen speichern.',
+    'Send-as addresses saved': 'Absenderadressen gespeichert',
+
+    // Export and translation
+    'Export': 'Exportieren',
+    'Export as .eml (X)': 'Als .eml exportieren (X)',
+    'Translate': 'Übersetzen',
+    'Translating…': 'Wird übersetzt …',
+    'Translated to English.': 'Ins Englische übersetzt.',
+    'Showing the original text.': 'Originaltext wird angezeigt.',
+    'Show original': 'Original anzeigen',
+    'Show translation': 'Übersetzung anzeigen',
+    'There is no text to translate.': 'Es gibt keinen Text zum Übersetzen.',
+    'Translation is not available.': 'Übersetzung ist nicht verfügbar.',
+    'This message is already in English.': 'Diese Nachricht ist bereits auf Englisch.',
+    'The translation failed. Try again.': 'Die Übersetzung ist fehlgeschlagen. Bitte erneut versuchen.',
   };
 
   var WEEKDAYS = { Mon: 'Mo', Tue: 'Di', Wed: 'Mi', Thu: 'Do', Fri: 'Fr', Sat: 'Sa', Sun: 'So' };
@@ -340,6 +398,30 @@
     [/^Remove (.+)$/, function (n) { return n + ' entfernen'; }],
     [/^Request failed \((\d+)\)$/, function (c) { return 'Anfrage fehlgeschlagen (' + c + ')'; }],
     [/^To: (.+)$/, function (p) { return 'An: ' + p; }],
+    [/^Filters \((\d+)\)$/, function (n) { return 'Filter (' + n + ')'; }],
+    [/^Undo send: (\d+) s$/, function (n) { return 'Senden rückgängig: ' + n + ' s'; }],
+    [/^Sending in (\d+) s…$/, function (n) { return 'Senden in ' + n + ' s …'; }],
+    [/^Reminders \((\d+)\)$/, function (n) { return 'Erinnerungen (' + n + ')'; }],
+    [/^Reminder set for (.+)$/, function (t) { return 'Erinnerung gesetzt für ' + t; }],
+    [/^Reminder: (.+)$/, function (s) { return 'Erinnerung: ' + s; }],
+    [/^(In 1 hour|This evening|Tomorrow morning|Next week) · (.+)$/, function (label, t) {
+      return { 'In 1 hour': 'In 1 Stunde', 'This evening': 'Heute Abend', 'Tomorrow morning': 'Morgen früh', 'Next week': 'Nächste Woche' }[label] + ' · ' + t;
+    }],
+    [/^Translated to English from ([^.]+)\.( Only the first part of this long message was translated\.)?$/, function (lang, more) {
+      return 'Ins Englische übersetzt (aus: ' + lang + ').' + (more ? ' Nur der erste Teil dieser langen Nachricht wurde übersetzt.' : '');
+    }],
+    [/^Translated to English\. Only the first part of this long message was translated\.$/, function () { return 'Ins Englische übersetzt. Nur der erste Teil dieser langen Nachricht wurde übersetzt.'; }],
+    [/^Showing the original text\. Only the first part of this long message was translated\.$/, function () { return 'Originaltext wird angezeigt. Nur der erste Teil dieser langen Nachricht wurde übersetzt.'; }],
+    [/^The sender name shows the address (.+), but the message really comes from (.+)\.$/, function (a, b) { return 'Der Absendername zeigt die Adresse ' + a + ', die Nachricht kommt aber tatsächlich von ' + b + '.'; }],
+    [/^The sender's domain contains unusual characters that can imitate a familiar name\.$/, function () { return 'Die Absender-Domain enthält ungewöhnliche Zeichen, mit denen sich ein vertrauter Name nachahmen lässt.'; }],
+    [/^The sender's domain is an internationalised look-alike form \(xn--\)\.$/, function () { return 'Die Absender-Domain ist eine internationalisierte Ähnlichkeitsform (xn--).'; }],
+    [/^The sender's domain (.+) looks very similar to (.+) but is not the same\.$/, function (a, b) { return 'Die Absender-Domain ' + a + ' sieht ' + b + ' sehr ähnlich, ist aber nicht dieselbe.'; }],
+    [/^The sender's domain (.+) contains "(.+)" but does not belong to (.+)\.$/, function (a, l, k) { return 'Die Absender-Domain ' + a + ' enthält „' + l + '“, gehört aber nicht zu ' + k + '.'; }],
+    [/^Replies would go to (.+), a different domain from the sender's\.$/, function (a) { return 'Antworten gingen an ' + a + ', eine andere Domain als die des Absenders.'; }],
+    [/^A link contains a user name before the web address, a common disguise\.$/, function () { return 'Ein Link enthält einen Benutzernamen vor der Webadresse, eine häufige Verschleierung.'; }],
+    [/^A link points to a numeric address \((.+)\) instead of a name\.$/, function (h) { return 'Ein Link führt zu einer Zahlenadresse (' + h + ') statt zu einem Namen.'; }],
+    [/^A link points to an internationalised look-alike domain \((.+)\)\.$/, function (h) { return 'Ein Link führt zu einer internationalisierten Ähnlichkeits-Domain (' + h + ').'; }],
+    [/^A link shows "(.+)" but leads to (.+)\.$/, function (t, h) { return 'Ein Link zeigt „' + t + '“, führt aber zu ' + h + '.'; }],
     [/^(Mon|Tue|Wed|Thu|Fri|Sat|Sun) (\d{4})-(\d\d)-(\d\d) (\d{1,2}):(\d\d) (AM|PM)$/, function (wd, y, mo, d, h, mi, ap) {
       var hour = Number(h) % 12 + (ap === 'PM' ? 12 : 0);
       return WEEKDAYS[wd] + ', ' + d + '.' + mo + '.' + y + ', ' + pad(hour) + ':' + mi;

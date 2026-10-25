@@ -4,7 +4,9 @@ Open-source webmail client for TU Darmstadt mailboxes (MIT). It talks to the uni
 
 Features: folders, search, threads, compose/reply/forward, attachments, drafts, move/archive/delete, calendar invitations, contacts and signatures. Mail actions operate on the real mailbox after sign-in. Background push notifications are not included.
 
-Interface: English and German (follows the browser language, switchable in the account menu or on the sign-in page), light, dark and system themes, keyboard shortcuts (press `?` for the list), print view for the open message, skip link, labelled landmarks and visible keyboard focus, installable as an app (offline shell only; mail is never cached), and operator branding.
+Mail tools: search filters (sender, recipient, subject, date range, attachment, flagged) with saved searches, undo send (a cancellable pause of 0 to 30 seconds before a message is submitted), reminders for messages, phishing hints (look-alike sender domains, mismatched or disguised links, display-name tricks, different reply-to), send-as addresses, export of a message as `.eml`, and translation of a message to English. Saved searches, reminders and the undo delay are stored in the browser, per account; nothing about them is kept on the server.
+
+Interface: English and German (follows the browser language, switchable in the account menu or on the sign-in page), keyboard shortcuts (press `?` for the list), print view for the open message, skip link, labelled landmarks and visible keyboard focus, installable as an app (offline shell only; mail is never cached), and operator branding.
 
 ## Quick start (local, one user)
 
@@ -40,6 +42,7 @@ All settings are environment variables (or a `.env` file; never put passwords in
 | `TU_MAIL_LOG=off` | Disable the JSON log (mainly for tests). |
 | `BRAND_NAME`, `BRAND_PRIMARY_COLOR`, `BRAND_HELP_URL`, `BRAND_FOOTER` | Name (max 40 characters), colour (`#rrggbb`), https help link and footer text shown on the pages and in the install manifest. Invalid values stop the server at startup. |
 | `BRAND_LOGO` | File name of a logo (`.svg`, `.png`, `.jpg`, `.webp`, max 512 KB) placed in `<TU_MAIL_DATA_DIR>/brand/`. |
+| `TRANSLATE_URL` | Address of a [LibreTranslate](https://libretranslate.com)-compatible server, for example your own installation. Without it the server never sends message text anywhere. Must be `https` (or localhost; `TRANSLATE_ALLOW_HTTP=true` permits a trusted internal `http` address). Optional: `TRANSLATE_API_KEY`, `TRANSLATE_TIMEOUT_SECONDS` (default 20). |
 | `METRICS_TOKEN` | At least 16 characters. Turns on `GET /metrics` (Prometheus text format), which then requires `Authorization: Bearer <token>`. Without it the endpoint answers 404. The request must carry the public host name in its `Host` header. Metrics hold counts only: no addresses, paths or user data. |
 
 ### Docker
@@ -82,6 +85,10 @@ Sessions are kept in the memory of the server process, together with the mailbox
 ## Threat model and privacy
 
 **What the server holds.** For each signed-in user: the mailbox password and profile, in process memory, for at most eight hours, removed on sign-out, expiry or restart. On disk, under `TU_MAIL_DATA_DIR`: the user's signature and contacts, and short records that stop a retried send from submitting a message twice (a hash of the message and the delivery result, not the message itself). Mailbox content is fetched live from the university servers and is not stored by TU Mail; the browser keeps what it displays in page memory.
+
+**Translation and privacy.** The Translate button appears only if the browser can translate on the device (the text then never leaves the machine) or the operator configured `TRANSLATE_URL`. In the second case the text of the message being translated, and nothing else, is sent from the server to that translation server, so choose one you trust and run it inside your own network. The server limits each request (300 parts, 30,000 characters) and each person to 40 requests per 10 minutes, and does not log or keep the text.
+
+**Send-as addresses.** A person may save up to five additional addresses on the allowed domain. The message is still submitted through their own authenticated account and carries a `Sender` header naming that account; the server refuses any address that is not saved in that person's settings. Whether the university's mail server accepts a different `From` address is up to its own policy.
 
 **What it defends against.** Cross-site requests (strict `SameSite` cookie, exact `Origin` check on every state-changing request), host-header tricks (single allowed host), clickjacking (`frame-ancestors 'none'`), script injection (a CSP with `script-src 'self'`, no inline scripts, sanitised HTML mail rendered in a sandboxed frame), password guessing (per-address and per-account throttling) and resource exhaustion at sign-in (session cap, 1 MB JSON limit, attachment limits). Remote images in mail are loaded only after the reader asks.
 

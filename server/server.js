@@ -23,6 +23,7 @@ function createApp(config = configModule.load()) {
   // One call per notable event: it goes to the log and to the counters.
   const log = (event, fields = {}, label) => { writeLog(event, fields); metrics.count(event, label); };
 
+  app.set('translate', config.translate);
   app.disable('x-powered-by');
   app.set('trust proxy', config.trustProxy);
   app.use(metrics.observe);
@@ -35,7 +36,7 @@ function createApp(config = configModule.load()) {
   app.get('/metrics', metrics.handler);
 
   // Branding is public: the sign-in page needs it before anyone has signed in.
-  app.get('/api/brand', (req, res) => res.json(brandModule.publicView(config.brand)));
+  app.get('/api/brand', (req, res) => res.json({ ...brandModule.publicView(config.brand), features: { translate: Boolean(config.translate) } }));
   app.get('/brand/logo', (req, res) => {
     const logo = config.brand.logo;
     if (!logo) return res.status(404).json({ error: 'Not found' });

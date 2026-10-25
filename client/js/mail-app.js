@@ -27,6 +27,7 @@ const state = {
   q: '',
   scopeAll: false,
   unreadOnly: false,
+  filters: {},
   page: 0,
   pageSize: 40,
   total: 0,
@@ -315,8 +316,16 @@ function itemHtml(open) {
 function skeletonHtml(n) {
   return Array.from({ length: n }, () => '<li class="mail-skeleton"><div class="sk round"></div><div><div class="sk l1"></div><div class="sk l2"></div><div class="sk l3"></div></div></li>').join('');
 }
+// Filters from the search panel (mail-search.js): from, to, subject, since, before, flagged, attach.
+function hasFilters() { return Object.values(state.filters).some(Boolean); }
+function isFiltered() { return !!state.q || state.unreadOnly || hasFilters(); }
+function addFilterParams(params) {
+  for (const [key, value] of Object.entries(state.filters)) {
+    if (value === true) params.set(key, '1'); else if (value) params.set(key, value);
+  }
+}
 function emptyHtml() {
-  if (state.q) return `<li class="mail-empty">${svg('mailEmpty')}<div class="big">No results</div>Nothing in this folder matches “${esc(state.q)}”.</li>`;
+  if (state.q || hasFilters()) return `<li class="mail-empty">${svg('mailEmpty')}<div class="big">No results</div>${state.q ? `Nothing in this folder matches “${esc(state.q)}”.` : 'Nothing in this folder matches these filters.'}</li>`;
   if (state.unreadOnly) return `<li class="mail-empty">${svg('mailEmpty')}<div class="big">All caught up</div>No unread messages here.</li>`;
   return `<li class="mail-empty">${svg('mailEmpty')}<div class="big">Nothing here</div>This folder is empty.</li>`;
 }
@@ -335,7 +344,7 @@ function renderList() {
 async function loadMessages(reset) {
   const folder = state.folder;
   // Coming back to a folder shows what we had straight away, then refreshes it underneath.
-  const snap = reset && !state.q && !state.unreadOnly ? MailCache.getList(folder) : null;
+  const snap = reset && !isFiltered() ? MailCache.getList(folder) : null;
   if (reset) {
     state.page = 0;
     state.total = 0;
@@ -356,6 +365,7 @@ async function loadMessages(reset) {
     const params = new URLSearchParams({ folder, page, pageSize: state.pageSize });
     if (state.q) { params.set('q', state.q); if (state.scopeAll) params.set('scope', 'all'); }
     if (state.unreadOnly) params.set('unread', '1');
+    addFilterParams(params);
     const data = await mailFetch(`/api/mail/messages?${params}`);
     if (reqId !== state.listReq) return;
     state.page = page;
@@ -373,7 +383,7 @@ async function loadMessages(reset) {
     const fresh = data.messages.filter((m) => !known.has(m.uid));
     state.messages = state.messages.concat(fresh).sort((a, b) => b.uid - a.uid);
     renderList();
-    if (page === 1 && !state.q && !state.unreadOnly) { MailCache.putList(folder, { messages: state.messages.slice(), related: state.related.slice(), total: state.total }); prefetchChains(folder, reqId); }
+    if (page === 1 && !isFiltered()) { MailCache.putList(folder, { messages: state.messages.slice(), related: state.related.slice(), total: state.total }); prefetchChains(folder, reqId); }
     loadPreviews(fresh.filter((m) => m.preview === undefined).map((m) => m.uid), folder, reqId);
     loadRelatedPreviews(reqId);
   } catch (err) {
@@ -723,11 +733,12 @@ async function softRefresh(manual) {
     const params = new URLSearchParams({ folder: state.folder, page: 1, pageSize: state.pageSize });
     if (state.q) { params.set('q', state.q); if (state.scopeAll) params.set('scope', 'all'); }
     if (state.unreadOnly) params.set('unread', '1');
+    addFilterParams(params);
     const data = await mailFetch(`/api/mail/messages?${params}`);
     let changed = false;
     const fresh = [];
     // Mail in the Inbox/Sent counterpart can change which message ends a chain (a reply you just sent).
-    if (data.related && !state.q && !state.unreadOnly) {
+    if (data.related && !isFiltered()) {
       const sig = (list) => list.map((m) => `${m.folder}/${m.uid}`).join(',');
       if (sig(data.related) !== sig(state.related || [])) {
         const oldPreview = new Map((state.related || []).map((m) => [`${m.folder}/${m.uid}`, m.preview]));
@@ -751,7 +762,7 @@ async function softRefresh(manual) {
       const before = state.messages.length;
       state.messages = state.messages.filter((m) => incomingUids.has(m.uid) || m.uid < floor);
       if (state.messages.length !== before) changed = true;
-    } else if (state.messages.length && !state.q && !state.unreadOnly) {
+    } else if (state.messages.length && !isFiltered()) {
       state.messages = [];
       changed = true;
     }
@@ -761,7 +772,7 @@ async function softRefresh(manual) {
       renderList();
       loadPreviews(fresh, state.folder, state.listReq);
       loadRelatedPreviews(state.listReq);
-      if (!state.q && !state.unreadOnly) MailCache.putList(state.folder, { messages: state.messages.slice(), related: state.related.slice(), total: state.total });
+      if (!isFiltered()) MailCache.putList(state.folder, { messages: state.messages.slice(), related: state.related.slice(), total: state.total });
     }
     if (manual) showManualSyncStatus('Mailbox up to date', true);
   } catch (err) {

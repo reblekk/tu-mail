@@ -52,7 +52,7 @@ test('German dictionary is complete for the static pages and has no dead entries
  // Every entry must still correspond to text somewhere in the client or the server.
  const sources=fs.readdirSync(path.join(client,'js')).filter(f=>f!=='i18n-de.js').map(f=>read('js/'+f)).concat([read('index.html'),read('mail.html')],
   fs.readFileSync(path.join(__dirname,'../server/server.js'),'utf8'),fs.readFileSync(path.join(__dirname,'../server/routes/mail.js'),'utf8')).join('\n');
- const serverFolderNames=new Set(['Theme: system','Theme: light','Theme: dark','Sent Items','Deleted Items','Junk','Trash','Inbox','Drafts','Sent','Archive','Spam','Message sent','Message']);
+ const serverFolderNames=new Set(['Sent Items','Deleted Items','Junk','Trash','Inbox','Drafts','Sent','Archive','Spam','Message sent','Message']);
  const dead=Object.keys(de).filter(k=>!sources.includes(k)&&!sources.includes(k.replace(/'/g,"\\'"))&&!serverFolderNames.has(k));
  assert.deepEqual(dead,[],'dictionary entries that no longer match any source text');
  for(const [k,v] of Object.entries(de)){assert.equal(typeof v,'string');assert.ok(v.trim(),'empty translation for '+k);}
@@ -60,14 +60,12 @@ test('German dictionary is complete for the static pages and has no dead entries
 });
 
 // ---------------------------------------------------------------- pages
-test('pages wire up theme, language, accessibility and the install manifest',()=>{
+test('pages wire up language, accessibility and the install manifest',()=>{
  for(const file of ['index.html','mail.html']){
   const html=read(file);
-  assert.match(html,/<script src="js\/theme\.js"><\/script>/,file+' loads the theme before paint');
-  assert.ok(html.indexOf('js/theme.js')<html.indexOf('</head>'),file+' sets the theme in <head>');
   assert.match(html,/class="skip-link" href="#main"/);assert.match(html,/<main[^>]*id="main"/);
   assert.match(html,/rel="manifest" href="manifest\.webmanifest"/);
-  assert.match(html,/href="css\/theme\.css"/);assert.match(html,/href="css\/a11y\.css"/);
+  assert.match(html,/href="css\/a11y\.css"/);
   assert.match(html,/js\/i18n\.js/);assert.match(html,/js\/i18n-de\.js/);
   for(const m of html.matchAll(/(?:src|href)="((?:css|js|assets)\/[^"]+)"/g))assert.ok(fs.existsSync(path.join(client,m[1])),file+' references missing '+m[1]);
  }
@@ -77,15 +75,11 @@ test('pages wire up theme, language, accessibility and the install manifest',()=
  assert.ok(mail.indexOf('js/ui-prefs.js')<mail.indexOf('js/auth.js'),'preferences load before the account menu uses them');
 });
 
-test('dark theme is scoped, keeps message bodies light, and print hides the chrome',()=>{
- const css=read('css/theme.css');
- const rules=css.replace(/\/\*[\s\S]*?\*\//g,'').split('}').map(r=>r.split('{')[0].trim()).filter(Boolean);
- assert.ok(rules.every(sel=>sel.split(',').every(s=>s.trim().startsWith(':root[data-theme="dark"]'))),'every theme rule is scoped to dark');
- assert.match(css,/\.msg-frame \{ background: #fff/);
+test('print hides the chrome, and no dark theme remains',()=>{
  const print=read('css/print.css');
  assert.match(print,/@media print/);assert.match(print,/\.msg-toolbar/);assert.match(print,/\.mail-folders/);
- const js=read('js/theme.js');
- assert.match(js,/data-theme/);assert.match(js,/prefers-color-scheme/);
+ assert.ok(!fs.existsSync(path.join(client,'css/theme.css'))&&!fs.existsSync(path.join(client,'js/theme.js')),'theme files are gone');
+ for(const f of fs.readdirSync(path.join(client,'css')))assert.ok(!/data-theme/.test(read('css/'+f)),f+' still has theme rules');
 });
 
 test('service worker never touches the API and the shortcuts file lists every documented key',()=>{

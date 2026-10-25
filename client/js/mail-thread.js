@@ -127,6 +127,7 @@
       <div class="card-head">${headHtml(card)}</div>
       <div class="card-details" hidden>${detailsHtml(m)}</div>
       <div class="msg-attachments">${attachmentsHtml(m)}</div>
+      <div class="safety-slot"></div>
       <div class="msg-banner card-banner" hidden>
         <span>Pictures are hidden to protect your privacy.</span>
         <button type="button" class="btn btn-secondary btn-sm" data-act="show-images">Show pictures</button>
@@ -135,6 +136,7 @@
       <div class="card-foot">
         <button type="button" class="card-btn" data-act="reply">${ico('reply')}<span>Reply</span></button>
         <button type="button" class="card-btn" data-act="forward">${ico('forward')}<span>Forward</span></button>
+        <button type="button" class="card-btn card-translate" data-act="translate"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg><span>Translate</span></button>
       </div>`;
   }
 
@@ -229,6 +231,7 @@
     const frame = card.el.querySelector('iframe');
     const m = card.m;
     card.el.querySelector('.card-banner').hidden = !m.remoteImages || card.showImages;
+    try { if (window.MailSafety) window.MailSafety.attach(card.el, m); } catch (err) { /* hints are optional */ }
     frame.addEventListener('load', () => {
       const doc = frame.contentDocument;
       if (!doc) return;

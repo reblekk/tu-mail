@@ -1,12 +1,10 @@
 /* Accessibility. Loaded on every page after the main sheets. */
 .skip-link { position: absolute; left: 8px; top: -60px; z-index: 30000; padding: 10px 14px; background: #fff; color: #252525; border: 2px solid #b90f22; font: 600 14px Arial, sans-serif; text-decoration: none; }
 .skip-link:focus { top: 8px; }
-:root[data-theme="dark"] .skip-link { background: #1a1b1f; color: #ececef; border-color: #e5596b; }
 
 /* Keyboard focus is always visible, including on the custom controls the scripts build. */
 :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible { outline: 2px solid var(--navy, #b90f22); outline-offset: 2px; }
 .mail-item:focus-visible, .mail-folder:focus-visible { outline-offset: -3px; }
-:root[data-theme="dark"] :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible { outline-color: #ff8f9c; }
 .mail-item[aria-current="true"] { box-shadow: inset 3px 0 0 var(--navy, #b90f22); }
 
 /* Touch targets on small screens. */
