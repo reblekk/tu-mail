@@ -222,3 +222,51 @@ test('German covers the calendar and notification strings',()=>{
  assert.equal(t('Notifications: count only'),'Benachrichtigungen: nur Anzahl');
  i18n._reset('en');
 });
+
+// ---------------------------------------------------------------- sign-in notification prompt and default pictures
+test('notification prompt: asked once per sign-in, only when it can help',()=>{
+ const base={page:'mail',flag:'1',mode:'off',supported:true,permission:'default'};
+ assert.equal(notify.shouldPrompt(base),true);
+ assert.equal(notify.shouldPrompt({...base,permission:'granted'}),true,'already allowed in the browser but switched off here: still ask');
+ assert.equal(notify.shouldPrompt({...base,mode:'count'}),false,'already on');
+ assert.equal(notify.shouldPrompt({...base,mode:'detail'}),false);
+ assert.equal(notify.shouldPrompt({...base,flag:null}),false,'not a fresh sign-in (a reload, or a second tab)');
+ assert.equal(notify.shouldPrompt({...base,page:'calendar'}),false,'only on the mail page');
+ assert.equal(notify.shouldPrompt({...base,supported:false}),false);
+ assert.equal(notify.shouldPrompt({...base,permission:'denied'}),false,'blocked in the browser: asking cannot help');
+ const login=read('js/login.js'),code=read('js/notify.js');
+ assert.match(login,/sessionStorage\.setItem\('tu-mail-notify-prompt', '1'\)/,'every successful sign-in sets the flag');
+ assert.match(code,/sessionStorage\.removeItem\('tu-mail-notify-prompt'\)/,'the flag is used up, so a reload does not ask again');
+ for(const label of ["'Count only'","'Sender and subject'","'Not now'"])assert.ok(code.includes(label),'the prompt offers '+label);
+ assert.match(read('js/auth.js'),/tu-notify-changed/,'the menu label follows a choice made in the prompt');
+});
+
+test('pictures in messages are shown by default and the setting can turn them off',()=>{
+ const vm=require('node:vm');
+ const store=new Map();
+ const sandbox={localStorage:{getItem:k=>store.has(k)?store.get(k):null,setItem:(k,v)=>store.set(k,String(v))},document:{readyState:'complete',querySelector:()=>null,getElementById:()=>null,addEventListener(){}},addEventListener(){},TuI18n:{lang:'en'}};
+ sandbox.window=sandbox;
+ vm.runInNewContext(read('js/ui-prefs.js'),sandbox);
+ const prefs=sandbox.TuPrefs;
+ assert.equal(prefs.picturesOn(),true,'on by default');assert.equal(prefs.picturesLabel(),'Pictures: on');
+ assert.equal(prefs.togglePictures(),'Pictures: off');assert.equal(prefs.picturesOn(),false);assert.equal(store.get('tu-mail-pictures'),'off');
+ assert.equal(prefs.togglePictures(),'Pictures: on');assert.equal(prefs.picturesOn(),true);
+ store.set('tu-mail-pictures','garbage');assert.equal(prefs.picturesOn(),true,'anything but "off" means on');
+ const broken={...sandbox,localStorage:{getItem(){throw new Error('blocked');},setItem(){throw new Error('blocked');}}};broken.window=broken;
+ vm.runInNewContext(read('js/ui-prefs.js'),broken);
+ assert.equal(broken.TuPrefs.picturesOn(),true,'when storage is unavailable the default applies');
+ assert.doesNotThrow(()=>broken.TuPrefs.togglePictures());
+ const thread=read('js/mail-thread.js');
+ assert.match(thread,/showImages: window\.TuPrefs \? window\.TuPrefs\.picturesOn\(\) : false/,'new cards follow the setting');
+ assert.match(read('js/auth.js'),/picturesLabel\(\)/,'the account menu has the switch');
+ assert.match(thread,/\.hidden = !m\.remoteImages \|\| card\.showImages/,'the "pictures are hidden" banner only shows when they are off');
+});
+
+test('German covers the notification prompt and the pictures switch',()=>{
+ const i18n=require('../client/js/i18n.js');require('../client/js/i18n-de.js');
+ i18n._reset('de');const t=s=>i18n.t(s);
+ assert.equal(t('Turn on notifications?'),'Benachrichtigungen aktivieren?');
+ assert.equal(t('Count only'),'Nur Anzahl');assert.equal(t('Sender and subject'),'Absender und Betreff');assert.equal(t('Not now'),'Jetzt nicht');
+ assert.equal(t('Pictures: on'),'Bilder: an');assert.equal(t('Pictures: off'),'Bilder: aus');
+ i18n._reset('en');
+});

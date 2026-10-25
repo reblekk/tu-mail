@@ -16,7 +16,7 @@
     for (const img of document.querySelectorAll('.tu-header-logo, .university-logo')) {
       if (b.logoUrl) { img.src = b.logoUrl; img.alt = b.name; }
     }
-    for (const el of document.querySelectorAll('.service-name')) el.textContent = b.name;
+    for (const el of document.querySelectorAll('.brand-title')) el.textContent = b.name;
     for (const el of document.querySelectorAll('.help')) if (b.helpUrl) el.href = b.helpUrl;
     const footer = document.querySelector('body > footer');
     if (footer && b.footer) footer.textContent = b.footer;

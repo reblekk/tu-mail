@@ -17,7 +17,8 @@ async function renderProfileMenu(user){
  if(mailPage){
   const undoButton=button(window.UndoSend?window.UndoSend.label():'Undo send: 10 s',()=>{if(window.UndoSend)undoButton.textContent=window.UndoSend.cycle();});
   const remindButton=button(window.MailReminders?window.MailReminders.label():'Reminders',()=>{menu.open=false;window.MailReminders?.showList();});window.MailReminders?.bindLabel(remindButton);
-  const notifyButton=button(window.MailNotify?window.MailNotify.label():'Notifications: off',async()=>{if(window.MailNotify)notifyButton.textContent=await window.MailNotify.cycle();});
+  const notifyButton=button(window.MailNotify?window.MailNotify.label():'Notifications: off',async()=>{if(window.MailNotify)notifyButton.textContent=await window.MailNotify.cycle();});window.addEventListener('tu-notify-changed',()=>{if(window.MailNotify)notifyButton.textContent=window.MailNotify.label();});
+  const picturesButton=button(window.TuPrefs.picturesLabel(),()=>{picturesButton.textContent=window.TuPrefs.togglePictures();});
   button('Name and send-as addresses',()=>{menu.open=false;window.MailIdentities?.edit();});
  }
  if(window.showShortcuts)button('Keyboard shortcuts',()=>{menu.open=false;window.showShortcuts();});

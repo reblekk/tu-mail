@@ -12,6 +12,8 @@ const { createLoginLimiter } = require('./middleware/rate-limit');
 const logger = require('./middleware/logger');
 const metricsModule = require('./middleware/metrics');
 const brandModule = require('./services/brand');
+const mailSettings = require('./services/mail-settings');
+const displayName = require('./services/display-name');
 
 function createApp(config = configModule.load()) {
   const app = express();
@@ -53,7 +55,7 @@ function createApp(config = configModule.load()) {
   app.post('/api/auth/login', async (req, res) => {
     const wait = limiter.checkIp(req.ip);
     if (wait) { log('login_throttled', { scope: 'ip', ip: req.ip }, ['scope', 'ip']); return tooMany(res, wait); }
-    const { email, username, password, profile } = req.body || {};
+    const { email, username, password, profile, fullName } = req.body || {};
     if (typeof email !== 'string' || !allowedEmail(email) || typeof username !== 'string' || !/^[a-z0-9_-]{3,64}$/i.test(username)
       || typeof password !== 'string' || !password || password.length > 1024) {
       return res.status(400).json({ error: 'Enter your TU email address, TU-ID and password.' });
@@ -64,7 +66,8 @@ function createApp(config = configModule.load()) {
     try {
       const settings = accountProfile({ email: address, username, profile });
       await imap.verifyCredentials({ email: address, username, password, ...settings });
-      const user = { userId: settings.profile + ':' + address, email: address, username, name: username, role: 'mail', ...settings };
+      const name = await rememberName(address, fullName);
+      const user = { userId: settings.profile + ':' + address, email: address, username, name: name || username, role: 'mail', ...settings };
       session.create(req, res, user, password);
       limiter.recordSuccess(address);
       log('login_ok', { who: who(address), ip: req.ip });
@@ -96,6 +99,19 @@ function createApp(config = configModule.load()) {
   });
   app.limiter = limiter;
   return app;
+}
+
+// The full name typed at sign-in becomes the name recipients see. It is only kept after a successful sign-in,
+// and a missing or unusable name leaves whatever was saved (or the name read from the address) alone.
+async function rememberName(address, typed) {
+  try {
+    let saved = await mailSettings.getSettings(address);
+    const name = displayName.clean(typed);
+    if (name && /\p{L}/u.test(name) && name !== saved.displayName) saved = await mailSettings.saveIdentities(address, saved.identities || [], name);
+    return displayName.forPerson(address, saved.displayName);
+  } catch {
+    return '';
+  }
 }
 
 function tooMany(res, seconds) {

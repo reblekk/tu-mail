@@ -2,7 +2,13 @@
 // (auth.js); the sign-in page gets a small bar in the header.
 (function () {
   const langLabel = () => (window.TuI18n.lang === 'de' ? 'Language: Deutsch' : 'Language: English');
+  // Pictures in messages: shown by default; the person can switch this off (per browser).
+  const PICTURES_KEY = 'tu-mail-pictures';
+  const picturesOn = () => { try { return localStorage.getItem(PICTURES_KEY) !== 'off'; } catch (e) { return true; } };
+  const picturesLabel = () => (picturesOn() ? 'Pictures: on' : 'Pictures: off');
+  const togglePictures = () => { try { localStorage.setItem(PICTURES_KEY, picturesOn() ? 'off' : 'on'); } catch (e) { /* stays as it was */ } return picturesLabel(); };
   window.TuPrefs = {
+    picturesOn, picturesLabel, togglePictures,
     langLabel,
     toggleLang: () => window.TuI18n.set(window.TuI18n.lang === 'de' ? 'en' : 'de'),
   };

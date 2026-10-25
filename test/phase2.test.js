@@ -364,3 +364,41 @@ test('German covers the new strings, including patterns',()=>{
  assert.match(t("The sender's domain x.com looks very similar to y.com but is not the same."),/sieht y\.com sehr ähnlich/);
  i18n._reset('en');
 });
+
+test('sign-in: the full name typed at login becomes the sender name, but only after a successful sign-in',async()=>{
+ const srv=await start();
+ const login=(email,password,fullName)=>call(srv,{method:'POST',url:'/api/auth/login',headers:{Origin:ORIGIN},body:{email,username:'ab12cdef',password,...(fullName===undefined?{}:{fullName})}});
+ const session=res=>({Cookie:res.headers['set-cookie'][0].split(';')[0],Origin:ORIGIN});
+ const view=h=>call(srv,{url:'/api/mail/identities',headers:h}).then(r=>r.json());
+ const email='fh12abcd@stud.tu-darmstadt.de'; // an ID-style address: no name can be read from it
+ const wrong=await login(email,'wrong-password','Not Saved');
+ assert.equal(wrong.status,401);
+ const first=await login(email,'test-only-password','  Fahim  Ul   Haque ');
+ assert.equal(first.status,200);assert.equal(first.json().user.name,'Fahim Ul Haque','the session shows the name, not the TU-ID');
+ let v=await view(session(first));
+ assert.equal(v.own.name,'Fahim Ul Haque');assert.equal(v.displayName,'Fahim Ul Haque');
+ const blank=await login(email,'test-only-password','');
+ assert.equal(blank.json().user.name,'Fahim Ul Haque','leaving it empty keeps the saved name');
+ const none=await login(email,'test-only-password');
+ assert.equal(none.json().user.name,'Fahim Ul Haque','API clients that send no name are unaffected');
+ const changed=await login(email,'test-only-password','Fahim Haque');
+ assert.equal((await view(session(changed))).own.name,'Fahim Haque','a new name replaces the old one');
+ const junk=await login(email,'test-only-password','12345 !!!');
+ assert.equal(junk.json().user.name,'Fahim Haque','a name without letters is ignored');
+ const ctrl=await login(email,'test-only-password','Fa\u0000him\n"Haque"');
+ assert.equal((await view(session(ctrl))).own.name,'Fa him Haque');
+ const long=await login(email,'test-only-password','A'.repeat(300));
+ assert.equal((await view(session(long))).own.name.length,80);
+ const fresh=await login('anna.schmidt@stud.tu-darmstadt.de','test-only-password');
+ assert.equal(fresh.json().user.name,'Anna Schmidt','with no typed name, one is read from a first.last address');
+ const idOnly=await login('zz99qqrr@stud.tu-darmstadt.de','test-only-password');
+ assert.equal(idOnly.json().user.name,'ab12cdef','nothing to show: the UI falls back to the TU-ID, mail goes out without a name');
+ assert.equal((await view(session(idOnly))).own.name,'');
+});
+
+test('sign-in page asks for the full name and sends it',()=>{
+ const html=read('index.html'),js=read('js/login.js');
+ assert.match(html,/<input id="fullname" name="fullName" type="text" autocomplete="name"[^>]*required>/);
+ assert.ok(html.indexOf('id="fullname"')>html.indexOf('id="email"')&&html.indexOf('id="fullname"')<html.indexOf('id="password"'));
+ assert.match(js,/body\.fullName/);assert.match(js,/tu-mail-fullnames/);
+});

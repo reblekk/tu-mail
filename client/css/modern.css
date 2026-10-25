@@ -253,3 +253,14 @@ footer { border-top: 0; color: var(--text-faint); }
 @media (max-width: 899px) {
   .cal-chip { height: 6px; padding: 0; font-size: 0; border-radius: 3px; background: var(--navy, #b90f22); }
 }
+
+#login .field-hint { margin: 6px 0 0; font-size: 12.5px; color: var(--text-muted); }
+
+/* Sign-in header: logo on the left, language switch on the right, one row at every width. */
+.site-header { flex-wrap: nowrap; align-items: center; justify-content: space-between; gap: 12px; min-height: 84px; }
+.site-header .prefs-bar { order: 0; width: auto; padding-bottom: 0; justify-content: flex-end; flex-shrink: 0; }
+@media (max-width: 600px) {
+  .site-header { width: calc(100% - 40px); min-height: 72px; }
+  .university-logo { width: 140px; height: 56px; }
+  .site-header .prefs-bar { order: 0; width: auto; padding-bottom: 0; }
+}
