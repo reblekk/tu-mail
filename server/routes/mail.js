@@ -10,6 +10,7 @@ const identities = require('../services/identities');
 const translateService = require('../services/translate');
 const calendar = require('../services/calendar');
 const displayName = require('../services/display-name');
+const folderNames = require('../services/folder-names');
 const { allowedEmail } = require('../services/account-profiles');
 
 const router = express.Router();
@@ -154,7 +155,7 @@ router.post('/disconnect', (req, res) => {
   res.json({ ok: true });
 });
 
-router.get('/folders', withMailbox((req, creds) => imap.listFolders(creds)));
+router.get('/folders', withMailbox(async (req, creds) => folderNames.tidy(await imap.listFolders(creds))));
 
 router.get('/unread', withMailbox((req, creds) => imap.inboxCounts(creds, Math.max(0, parseInt(req.query.since, 10) || 0), (req.query.after === undefined ? -1 : Math.max(0, parseInt(req.query.after, 10) || 0)))));
 

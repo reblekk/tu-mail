@@ -7,7 +7,7 @@ function canLeaveComposer(){if(window.composeIsOpen?.()){showToast('Close or sav
 async function renderProfileMenu(user){
  const target=document.getElementById('profile-menu');
  const menu=document.createElement('details');menu.className='account-menu';
- const trigger=document.createElement('summary');trigger.textContent='Account';trigger.setAttribute('aria-label','Account menu');
+ const trigger=document.createElement('summary');trigger.innerHTML='<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3.2"/><path d="M5.8 19.2c1.2-2.6 3.6-4 6.2-4s5 1.4 6.2 4"/></svg>';trigger.setAttribute('aria-label','Account menu');trigger.title='Account';
  const panel=document.createElement('div');panel.className='account-panel';
  const name=document.createElement('strong');name.textContent=user.email;panel.append(name);
  const button=(label,action)=>{const b=document.createElement('button');b.type='button';b.textContent=label;b.onclick=action;panel.append(b);return b;};
@@ -19,6 +19,7 @@ async function renderProfileMenu(user){
   const remindButton=button(window.MailReminders?window.MailReminders.label():'Reminders',()=>{menu.open=false;window.MailReminders?.showList();});window.MailReminders?.bindLabel(remindButton);
   const notifyButton=button(window.MailNotify?window.MailNotify.label():'Notifications: off',async()=>{if(window.MailNotify)notifyButton.textContent=await window.MailNotify.cycle();});window.addEventListener('tu-notify-changed',()=>{if(window.MailNotify)notifyButton.textContent=window.MailNotify.label();});
   const picturesButton=button(window.TuPrefs.picturesLabel(),()=>{picturesButton.textContent=window.TuPrefs.togglePictures();});
+  button('Contacts',()=>{menu.open=false;window.MailContacts?.open();});
   button('Name and send-as addresses',()=>{menu.open=false;window.MailIdentities?.edit();});
  }
  if(window.showShortcuts)button('Keyboard shortcuts',()=>{menu.open=false;window.showShortcuts();});

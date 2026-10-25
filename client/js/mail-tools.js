@@ -18,7 +18,8 @@
     try{const drafts=await MailRecovery.list(user.userId);if(!drafts.length)d.append(node('p','No recovered drafts.'));for(const record of drafts){const row=node('div');row.className='contact-row';row.append(node('span',(record.subject||'(No subject)')+' · '+new Date(record.updated).toLocaleString()));const open=node('button','Restore'),remove=node('button','Remove local copy');open.onclick=()=>{d.close();window.restoreRecoveredDraft(record);};remove.onclick=async()=>{await MailRecovery.remove(record.id);row.remove();};row.append(open,remove);d.append(row);}}catch(e){d.append(node('p','Local draft storage is unavailable in this browser.'));}d.append(close);d.showModal();
   }
   const controls=node('div');controls.className='mail-extra-tools';
-  for(const [title,action] of [['Contacts',contacts],['Recovered drafts',recover]]){const button=node('button',title);button.type='button';button.onclick=action;controls.append(button);}
+  window.MailContacts={open:contacts};
+  for(const [title,action] of [['Recovered drafts',recover]]){const button=node('button',title);button.type='button';button.onclick=action;controls.append(button);}
   document.getElementById('mail-folders').append(controls);
   document.addEventListener('click',async event=>{
     const link=event.target.closest('[data-invitation]');if(!link)return;event.preventDefault();

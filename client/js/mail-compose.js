@@ -990,7 +990,7 @@
       await removeRecovery().catch(()=>{});
       closeNow();
       if(result.rejected?.length) toast('Sent to accepted recipients. Rejected: '+result.rejected.join(', '),'error');
-      toast(result.savedToSent === false ? 'Message sent (a copy could not be saved to Sent Items)' : 'Message sent', 'success');
+      toast(result.savedToSent === false ? 'Message sent (a copy could not be saved to Sent)' : 'Message sent', 'success');
       if (wasReply && typeof window.markMessageAnswered === 'function') window.markMessageAnswered(folder, uid);
       if (wasReply) clearThreadCache([{ folder, uid }]);
       loadFolders().catch(() => {});

@@ -264,3 +264,78 @@ footer { border-top: 0; color: var(--text-faint); }
   .university-logo { width: 140px; height: 56px; }
   .site-header .prefs-bar { order: 0; width: auto; padding-bottom: 0; }
 }
+
+/* ---------- header: logo in the middle ---------- */
+.mail-main .page-title { position: relative; }
+.mail-main .page-title .tu-header-logo { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0; pointer-events: none; }
+.mail-main .page-title-left { flex: 1 1 0; min-width: 0; }
+.mail-main .page-title .profile-menu, .mail-main .page-title > .mail-icon-btn { position: relative; z-index: 1; }
+.mail-main .page-title-left > :not(.tu-header-logo) { position: relative; z-index: 1; }
+.mail-main .phone-title, .mail-main .page-title h2 { max-width: calc(50vw - 84px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---------- sidebar tools: left aligned like the other links ---------- */
+.mail-extra-tools { padding: 8px 0; }
+.mail-extra-tools button {
+  display: flex; align-items: center; justify-content: flex-start; gap: 8px;
+  width: calc(100% - 20px); margin: 2px 10px; padding: 9px 12px; text-align: left;
+  background: transparent; border: 0; border-radius: 10px; color: var(--text-muted); font: 500 14px var(--font); cursor: pointer;
+}
+.mail-extra-tools button:hover { background: rgba(16, 24, 40, .05); color: var(--text); }
+.mail-signature-link, a.mail-signature-link { display: flex; align-items: center; justify-content: flex-start; text-align: left; gap: 8px; }
+.mail-main .page-title .tu-header-logo { width: 112px; height: 46px; }
+@media (max-width: 420px) { .mail-main .page-title .tu-header-logo { width: 92px; height: 38px; } }
+.mail-signature-link, a.mail-signature-link { opacity: 1; color: var(--text-muted); }
+.mail-signature-link:hover, a.mail-signature-link:hover { color: var(--text); }
+
+/* ---------- sync button sits at the right end of the filter row ---------- */
+.filters-sync { margin-left: auto; width: 32px; height: 32px; color: var(--text-muted); flex-shrink: 0; }
+.filters-sync svg { width: 17px; height: 17px; }
+.filters-sync:hover { color: var(--navy, #b90f22); }
+#mail-refresh { display: none; }
+
+/* ---------- account menu is an icon ---------- */
+.account-menu summary { width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%; color: var(--text-muted); }
+.account-menu summary::after { content: none; }
+.account-menu summary svg { display: block; }
+
+/* ---------- keep the folder name clear of the centred logo ---------- */
+.mail-main .phone-title, .mail-main .page-title h2 { max-width: calc(50vw - 126px); }
+@media (min-width: 900px) { .mail-main .phone-title, .mail-main .page-title h2 { max-width: none; } }
+@media (max-width: 520px) {
+  .mail-main .page-title .tu-header-logo { width: 84px; height: 34px; }
+  .mail-main .phone-title, .mail-main .page-title h2 { font-size: 17px; max-width: calc(50vw - 112px); }
+}
+
+/* ---------- a larger, readable header logo (still clear of the title on the left and the icon on the right) ---------- */
+.mail-main .page-title { min-height: 68px; }
+.mail-main .page-title .tu-header-logo { width: 168px; height: 60px; }
+@media (max-width: 899px) {
+  .mail-main .page-title { min-height: 64px; }
+  .mail-main .page-title .tu-header-logo { width: 148px; height: 54px; }
+  .mail-main .phone-title, .mail-main .page-title h2 { max-width: calc(50vw - 148px); }
+}
+@media (max-width: 520px) {
+  .mail-main .page-title .tu-header-logo { width: 132px; height: 48px; }
+  .mail-main .phone-title, .mail-main .page-title h2 { font-size: 17px; max-width: calc(50vw - 134px); }
+}
+@media (max-width: 400px) {
+  .mail-main .page-title .tu-header-logo { width: 112px; height: 41px; }
+  .mail-main .phone-title, .mail-main .page-title h2 { max-width: calc(50vw - 124px); }
+}
+
+/* Larger still: sizes chosen so the folder name (left) and account icon (right) always keep clear of the logo. */
+.mail-main .page-title { min-height: 72px; }
+.mail-main .page-title .tu-header-logo { width: 190px; height: 66px; }
+@media (max-width: 899px) {
+  .mail-main .page-title { min-height: 66px; }
+  .mail-main .page-title .tu-header-logo { width: 160px; height: 58px; }
+  .mail-main .phone-title, .mail-main .page-title h2 { max-width: calc(50vw - 152px); }
+}
+@media (max-width: 520px) {
+  .mail-main .page-title .tu-header-logo { width: 148px; height: 54px; }
+  .mail-main .phone-title, .mail-main .page-title h2 { max-width: calc(50vw - 146px); }
+}
+@media (max-width: 400px) {
+  .mail-main .page-title .tu-header-logo { width: 124px; height: 45px; }
+  .mail-main .phone-title, .mail-main .page-title h2 { font-size: 16px; max-width: calc(50vw - 132px); }
+}

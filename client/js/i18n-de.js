@@ -225,7 +225,7 @@
     'I checked — send a new copy': 'Ich habe geprüft — neue Kopie senden',
     'Keep draft': 'Entwurf behalten',
     'Sent to accepted recipients. Rejected:': 'An akzeptierte Empfänger gesendet. Abgelehnt:',
-    'Message sent (a copy could not be saved to Sent Items)': 'Nachricht gesendet (eine Kopie konnte nicht in Gesendete Elemente gespeichert werden)',
+    'Message sent (a copy could not be saved to Sent)': 'Nachricht gesendet (eine Kopie konnte nicht in Gesendet gespeichert werden)',
     'Message sent': 'Nachricht gesendet',
     'Your mailbox session has expired. Open Mail again and unlock your mailbox, then send once more — your message is still here.': 'Ihre Postfach-Sitzung ist abgelaufen. Öffnen Sie Mail erneut und entsperren Sie das Postfach, senden Sie dann noch einmal — Ihre Nachricht ist noch vorhanden.',
     'The message could not be sent.': 'Die Nachricht konnte nicht gesendet werden.',

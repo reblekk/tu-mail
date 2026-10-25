@@ -200,7 +200,8 @@ test('the calendar page and the mail page link to each other and the menu knows 
  const cal=read('calendar.html'),mail=read('mail.html');
  for(const id of ['cal-prev','cal-today','cal-next','cal-heading','view-month','view-agenda','cal-new','cal-export','cal-grid','cal-agenda','cal-day','cal-day-add','profile-menu'])assert.ok(cal.includes('id="'+id+'"'),'calendar page lacks #'+id);
  assert.match(cal,/<body data-page="calendar">/);assert.match(mail,/<body data-page="mail">/);
- assert.match(cal,/href="mail\.html"/);assert.match(mail,/id="open-calendar" href="calendar\.html"/);
+ assert.match(cal,/href="mail\.html"/);assert.ok(!mail.includes('id="open-calendar"'),'no Calendar link in the sidebar');
+ assert.match(read('js/auth.js'),/mailPage\?'Calendar':'Mail'/,'the calendar is reached from the account menu');
  assert.ok(cal.indexOf('js/auth.js')<cal.indexOf('js/calendar.js'));
  assert.ok(mail.indexOf('js/notify.js')<mail.indexOf('js/auth.js'),'notify loads before the account menu is built');
  const auth=read('js/auth.js');
@@ -269,4 +270,33 @@ test('German covers the notification prompt and the pictures switch',()=>{
  assert.equal(t('Count only'),'Nur Anzahl');assert.equal(t('Sender and subject'),'Absender und Betreff');assert.equal(t('Not now'),'Jetzt nicht');
  assert.equal(t('Pictures: on'),'Bilder: an');assert.equal(t('Pictures: off'),'Bilder: aus');
  i18n._reset('en');
+});
+
+test('mail page layout: sync button in the filter row, account menu is an icon, no Contacts or Calendar in the sidebar',()=>{
+ const mail=read('mail.html'),auth=read('js/auth.js'),tools=read('js/mail-tools.js');
+ const filters=mail.slice(mail.indexOf('class="mail-filters"'),mail.indexOf('id="mail-filter-panel"'));
+ assert.ok(filters.includes('id="mail-refresh-top"'),'sync button is in the filter row');
+ const header=mail.slice(mail.indexOf('<div class="page-title">'),mail.indexOf('id="mail-state-loading"'));
+ assert.ok(!header.includes('mail-refresh-top'),'and no longer in the header');
+ assert.match(auth,/trigger\.innerHTML='<svg/,'the account menu shows an icon');
+ assert.ok(!/trigger\.textContent='Account'/.test(auth));assert.match(auth,/aria-label','Account menu'/,'it keeps an accessible name');
+ const sidebar=mail.slice(mail.indexOf('id="mail-folders"'),mail.indexOf('id="mail-scrim"'));
+ assert.ok(!/Calendar|calendar\.html/.test(sidebar),'no Calendar in the sidebar');
+ assert.ok(!/\['Contacts',contacts\]/.test(tools),'no Contacts button in the sidebar tools');
+ assert.match(tools,/window\.MailContacts=\{open:contacts\}/);assert.match(auth,/button\('Contacts'/,'Contacts opens from the account menu');
+});
+
+test('the Sent folder is shown as "Sent", only by name',async()=>{
+ const names=require('../server/services/folder-names');
+ const list=[{path:'INBOX',name:'Inbox',role:'inbox'},{path:'Sent Items',name:'Sent Items',role:'sent'},{path:'Sent',name:'sent items',role:'sent'},{path:'Deleted Items',name:'Deleted Items',role:'trash'},{path:'Projects/Sent Items',name:'Sent Items',role:'other'}];
+ const out=names.tidy(list);
+ assert.deepEqual(out.map(f=>f.name),['Inbox','Sent','Sent','Deleted Items','Sent Items'],'only the special Sent folder is renamed');
+ assert.deepEqual(out.map(f=>f.path),list.map(f=>f.path),'paths are never touched');
+ assert.equal(list[1].name,'Sent Items','the input is not modified');
+ assert.deepEqual(names.tidy([]),[]);
+ const srv=await start();const me=await signIn(srv);
+ imap.listFolders=async()=>list;
+ const res=await call(srv,{url:'/api/mail/folders',headers:me.headers});
+ assert.equal(res.status,200);assert.equal(res.json().find(f=>f.path==='Sent Items').name,'Sent');
+ assert.ok(!read('js/mail-compose.js').includes('saved to Sent Items'),'messages say Sent too');
 });
