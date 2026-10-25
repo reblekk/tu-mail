@@ -11,6 +11,8 @@ const csp = config => [
   "font-src 'self'",
   "connect-src 'self'",
   "frame-src 'self' blob:",
+  "worker-src 'self'",
+  "manifest-src 'self'",
   "object-src 'none'",
   "base-uri 'none'",
   "form-action 'self'",

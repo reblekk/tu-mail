@@ -19,12 +19,20 @@
 <link rel="stylesheet" href="css/mail.css" />
 <link rel="stylesheet" href="css/mail-compose.css" />
 <link rel="stylesheet" href="css/mail-cards.css" />
-<link rel="stylesheet" href="css/standalone.css" /></head>
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="assets/icon-192.png" />
+<link rel="stylesheet" href="css/standalone.css" />
+<link rel="stylesheet" href="css/theme.css" />
+<link rel="stylesheet" href="css/a11y.css" />
+<link rel="stylesheet" href="css/print.css" media="print" />
+<script src="js/theme.js"></script></head>
 <body>
+  <a class="skip-link" href="#main">Skip to main content</a>
   <div class="app-shell">
-    
 
-    <main class="main-content mail-main">
+
+    <main class="main-content mail-main" id="main">
       <div class="page-title">
         <div class="page-title-left">
           <img class="tu-header-logo" src="assets/tu-logo.svg" alt="Technische Universität Darmstadt" width="190" height="74">
@@ -71,7 +79,7 @@
       </div>
 
       <div class="mail-app" id="mail-app" data-view="list" hidden>
-        <aside class="mail-folders" id="mail-folders">
+        <aside class="mail-folders" id="mail-folders" aria-label="Folders">
           <div class="mail-folders-head">
             <button type="button" class="btn btn-primary btn-block mail-compose-btn" id="compose-btn-folders">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
@@ -95,7 +103,7 @@
         </aside>
         <div class="mail-scrim" id="mail-scrim"></div>
 
-        <section class="mail-list-pane">
+        <section class="mail-list-pane" aria-label="Message list">
           <div class="mail-list-head">
             <div class="mail-list-title-row">
               <button type="button" class="mail-icon-btn" id="folders-toggle" aria-label="Show folders">
@@ -141,7 +149,7 @@
             </div>
           </div>
           <div class="mail-list-scroll" id="mail-list-scroll">
-            <ul class="mail-list" id="mail-list"></ul>
+            <ul class="mail-list" id="mail-list" aria-label="Messages"></ul>
             <div class="mail-more" id="mail-more" hidden></div>
           </div>
         </section>
@@ -150,7 +158,7 @@
           <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
         </button>
 
-        <section class="mail-read-pane" id="mail-read-pane">
+        <section class="mail-read-pane" id="mail-read-pane" aria-label="Message">
           <div class="mail-read-empty" id="mail-read-empty">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
             <div>Select a message to read</div>
@@ -185,6 +193,10 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
                 <span class="label">Flag</span>
               </button>
+              <button type="button" class="mail-tool" id="msg-print" title="Print message (P)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                <span class="label">Print</span>
+              </button>
               <span class="spacer"></span>
             </div>
             <div class="msg-scroll" id="msg-scroll">
@@ -198,6 +210,13 @@
 
   
 
+  <script src="js/i18n.js"></script>
+  <script src="js/i18n-de.js"></script>
+  <script src="js/ui-prefs.js"></script>
+  <script src="js/pwa.js"></script>
+  <script src="js/brand.js"></script>
+  <script src="js/a11y.js"></script>
+  <script src="js/shortcuts.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/mail-app.js"></script>
   <script src="js/mail-cache.js"></script>

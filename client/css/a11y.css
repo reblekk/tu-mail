@@ -1,0 +1,37 @@
+/* Accessibility. Loaded on every page after the main sheets. */
+.skip-link { position: absolute; left: 8px; top: -60px; z-index: 30000; padding: 10px 14px; background: #fff; color: #252525; border: 2px solid #b90f22; font: 600 14px Arial, sans-serif; text-decoration: none; }
+.skip-link:focus { top: 8px; }
+:root[data-theme="dark"] .skip-link { background: #1a1b1f; color: #ececef; border-color: #e5596b; }
+
+/* Keyboard focus is always visible, including on the custom controls the scripts build. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible { outline: 2px solid var(--navy, #b90f22); outline-offset: 2px; }
+.mail-item:focus-visible, .mail-folder:focus-visible { outline-offset: -3px; }
+:root[data-theme="dark"] :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible { outline-color: #ff8f9c; }
+.mail-item[aria-current="true"] { box-shadow: inset 3px 0 0 var(--navy, #b90f22); }
+
+/* Touch targets on small screens. */
+@media (pointer: coarse) { .mail-icon-btn, .mail-tool, .mail-flag-btn { min-width: 44px; min-height: 44px; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+@media (forced-colors: active) {
+  .mail-item.selected, .mail-folder.active, .mail-item[aria-current="true"] { outline: 2px solid Highlight; }
+}
+
+.account-panel button[hidden] { display: none; }
+.mail-tool#msg-print { color: inherit; }
+
+/* Shortcut list, account-menu preferences. */
+.shortcuts-table { border-collapse: collapse; width: 100%; margin-bottom: 8px; }
+.shortcuts-table td { padding: 6px 8px; border-bottom: 1px solid var(--border, #eee); vertical-align: middle; }
+.shortcuts-table td:first-child { white-space: nowrap; width: 1%; }
+kbd { display: inline-block; min-width: 22px; padding: 2px 6px; margin: 0 1px; border: 1px solid var(--border, #bbb); border-bottom-width: 2px; border-radius: 4px; background: var(--bg-2, #f2f2f2); color: inherit; font: 12px/1.3 ui-monospace, Consolas, monospace; text-align: center; }
+.site-header { flex-wrap: wrap; row-gap: 8px; }
+.service-name { white-space: nowrap; }
+.prefs-bar button { white-space: nowrap; }
+@media (max-width: 600px) { .site-header .prefs-bar { order: 3; width: 100%; justify-content: flex-end; padding-bottom: 8px; } }
+.prefs-bar { display: flex; gap: 8px; align-items: center; }
+.prefs-bar button { width: auto; min-height: 34px; margin: 0; padding: 4px 10px; background: transparent; color: inherit; border: 1px solid var(--line, #bbb); font: 13px Arial, sans-serif; }
+.prefs-bar button:hover { background: var(--bg-2, #f0f0f0); color: inherit; border-color: var(--line, #bbb); }
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }

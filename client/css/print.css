@@ -1,0 +1,17 @@
+/* Printing the open message: chrome out, message cards across the full page. */
+@media print {
+  @page { margin: 16mm; }
+  html, body { background: #fff !important; color: #000 !important; height: auto !important; }
+  .page-title, .mail-folders, .mail-list-pane, .mail-scrim, .msg-toolbar, .mail-fab, .mail-snack, .tu-toast,
+  .card-actions, .card-action, .card-btn, .card-banner, .mail-state, #mail-sync, .cmp-overlay, .cmp-dialog-overlay,
+  dialog, .skip-link { display: none !important; }
+  .app-shell, .main-content, .mail-main, .mail-app, .mail-read-pane, .mail-read-body, .msg-scroll, #msg-content, .thread {
+    display: block !important; position: static !important; height: auto !important; max-height: none !important;
+    overflow: visible !important; width: auto !important; padding: 0 !important; margin: 0 !important; background: #fff !important; border: 0 !important;
+  }
+  .msg-card { break-inside: avoid-page; border: 1px solid #999 !important; box-shadow: none !important; margin: 0 0 12px !important; background: #fff !important; color: #000 !important; }
+  .msg-card * { color: #000 !important; }
+  .msg-subject { font-size: 18pt !important; margin: 0 0 10px !important; }
+  .msg-frame { width: 100% !important; border: 0 !important; overflow: visible !important; }
+  a[href]::after { content: ""; }
+}

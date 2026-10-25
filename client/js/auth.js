@@ -11,6 +11,12 @@ async function renderProfileMenu(user){
  const panel=document.createElement('div');panel.className='account-panel';
  const name=document.createElement('strong');name.textContent=user.email;panel.append(name);
  const button=(label,action)=>{const b=document.createElement('button');b.type='button';b.textContent=label;b.onclick=action;panel.append(b);return b;};
+ const themeButton=button(window.TuPrefs.themeLabel(),()=>{window.TuPrefs.cycleTheme();themeButton.textContent=window.TuPrefs.themeLabel();});
+ button(window.TuPrefs.langLabel(),()=>{if(canLeaveComposer())window.TuPrefs.toggleLang();});
+ button('Keyboard shortcuts',()=>{menu.open=false;window.showShortcuts();});
+ button('Print message',()=>{menu.open=false;if(typeof state!=='undefined'&&state.current)window.print();else showToast('Open a message first.');});
+ const install=button('Install app',()=>{menu.open=false;window.TuPwa?.install();});install.hidden=!window.TuPwa?.canInstall();
+ window.addEventListener('tu-install-ready',()=>{install.hidden=false;});
  button('Add another account',()=>{if(canLeaveComposer())location.href='/index.html?add=1';});
  button('Sign out of all accounts',async()=>{if(!canLeaveComposer())return;try{await fetch('/api/auth/logout',{method:'POST',headers:accountHeaders()});clearSession();location.replace('/');}catch{showToast('Could not sign out. Try again.','error');}});
  menu.append(trigger,panel);target.replaceChildren(menu);

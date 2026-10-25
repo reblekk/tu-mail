@@ -18,7 +18,10 @@ function load(env = process.env) {
     }
   }
   const port = Number(env.PORT) || 3210;
+  if (env.METRICS_TOKEN && env.METRICS_TOKEN.length < 16) throw new Error('METRICS_TOKEN must be at least 16 characters.');
   return {
+    brand: require('./services/brand').load(env),
+    metricsToken: env.METRICS_TOKEN || null,
     publicUrl,
     port,
     bindHost: env.BIND_HOST || (publicUrl ? '0.0.0.0' : '127.0.0.1'),

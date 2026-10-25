@@ -1,0 +1,33 @@
+// Offline shell for the installed app. It stores only the static page files; anything under /api/ and
+// every non-GET request goes straight to the network, so no mail, session or user data is ever cached.
+const CACHE = 'tu-mail-shell-v1';
+const SHELL = [
+  '/', '/index.html', '/mail.html', '/manifest.webmanifest',
+  '/css/login.css', '/css/main.css', '/css/dashboard.css', '/css/mobile.css', '/css/mail.css', '/css/mail-compose.css',
+  '/css/mail-cards.css', '/css/standalone.css', '/css/theme.css', '/css/a11y.css', '/css/print.css',
+  '/js/theme.js', '/js/i18n.js', '/js/i18n-de.js', '/js/brand.js', '/js/pwa.js', '/js/ui-prefs.js', '/js/a11y.js', '/js/shortcuts.js',
+  '/js/login.js', '/js/auth.js', '/js/mail-app.js', '/js/mail-cache.js', '/js/mail-thread.js', '/js/mail-preview.js',
+  '/js/mail-organize.js', '/js/mail-recovery.js', '/js/mail-compose.js', '/js/mail-signature.js', '/js/mail-tools.js',
+  '/assets/tu-logo.svg', '/assets/icon.svg', '/assets/icon-192.png',
+];
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(caches.open(CACHE).then((cache) => Promise.all(SHELL.map((url) => cache.add(url).catch(() => {})))).then(() => self.skipWaiting()));
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim()));
+});
+
+self.addEventListener('fetch', (event) => {
+  const req = event.request;
+  const url = new URL(req.url);
+  if (req.method !== 'GET' || url.origin !== self.location.origin || url.pathname.startsWith('/api/') || url.pathname === '/metrics') return;
+  // Network first so a new release is picked up immediately; the cache is only the offline fallback.
+  event.respondWith(
+    fetch(req).then((res) => {
+      if (res.ok && res.type === 'basic') { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(req, copy)); }
+      return res;
+    }).catch(() => caches.match(req).then((hit) => hit || (req.mode === 'navigate' ? caches.match('/index.html') : Response.error()))),
+  );
+});

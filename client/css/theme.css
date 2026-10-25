@@ -1,0 +1,112 @@
+/* Dark theme. Loaded last. theme.js puts the resolved theme in <html data-theme>; light is the
+   existing stylesheet, so everything here is scoped to dark. Mail bodies stay on a light canvas
+   because senders style their HTML for a white background. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --navy: #cf3f52; --navy-dark: #b32f41; --navy-tint: #3a2227;
+  --emerald: #cf3f52; --emerald-dark: #e5596b; --emerald-tint: #3a2227;
+  --amber-tint: #3a2f1c; --danger: #ff6b70; --danger-tint: #3d2224;
+  --bg: #121316; --bg-2: #1d1e22; --surface: #1a1b1f; --border: #34363c;
+  --text: #ececef; --text-muted: #a8abb2; --text-faint: #8a8d95;
+  --shadow-sm: 0 1px 2px #0006; --shadow: 0 4px 16px #0008; --shadow-lg: 0 12px 32px #000a;
+  --accent: #e5596b; --ink: #ececef; --line: #3a3c42;
+}
+:root[data-theme="dark"] body { background: var(--bg); color: var(--text); }
+
+/* Surfaces that standalone.css and the feature sheets paint white or light grey. */
+:root[data-theme="dark"] .mail-main .page-title,
+:root[data-theme="dark"] .cmp-head,
+:root[data-theme="dark"] .cmp-window,
+:root[data-theme="dark"] .cmp-dialog,
+:root[data-theme="dark"] .mail-card,
+:root[data-theme="dark"] .msg-card,
+:root[data-theme="dark"] .account-panel,
+:root[data-theme="dark"] .account-panel button,
+:root[data-theme="dark"] .mail-popup,
+:root[data-theme="dark"] .popup-menu,
+:root[data-theme="dark"] .mail-utility-dialog,
+:root[data-theme="dark"] .mail-utility-dialog button,
+:root[data-theme="dark"] .mail-search input,
+:root[data-theme="dark"] .mail-chip,
+:root[data-theme="dark"] .mail-chip.active,
+:root[data-theme="dark"] .card-btn,
+:root[data-theme="dark"] .cmp-size-select { background: var(--surface); color: var(--text); }
+:root[data-theme="dark"] .mail-folders,
+:root[data-theme="dark"] .mail-list-head,
+:root[data-theme="dark"] .msg-toolbar,
+:root[data-theme="dark"] .mail-read-empty,
+:root[data-theme="dark"] .cmp-toolbar,
+:root[data-theme="dark"] .cmp-foot { background: var(--bg-2); }
+:root[data-theme="dark"] .msg-scroll { background: var(--bg); }
+:root[data-theme="dark"] .mail-item:hover,
+:root[data-theme="dark"] .mail-folder:hover,
+:root[data-theme="dark"] .card-head-collapsed:hover,
+:root[data-theme="dark"] .profile-menu .btn:hover,
+:root[data-theme="dark"] .msg-attachment:hover { background: #26282d; color: var(--text); }
+:root[data-theme="dark"] .mail-item.selected,
+:root[data-theme="dark"] .mail-folder.active,
+:root[data-theme="dark"] .account-panel button:hover { background: var(--navy-tint); color: #ffd9de; }
+:root[data-theme="dark"] .mail-folder.active:hover { background: #47282e; }
+:root[data-theme="dark"] .mail-item .avatar,
+:root[data-theme="dark"] .card-avatar { background: #47282e !important; color: #ffd9de !important; }
+
+/* Borders and text with fixed values. */
+:root[data-theme="dark"] .msg-toolbar,
+:root[data-theme="dark"] .mail-extra-tools,
+:root[data-theme="dark"] .contact-row,
+:root[data-theme="dark"] .msg-card,
+:root[data-theme="dark"] .cmp-window,
+:root[data-theme="dark"] .cmp-dialog,
+:root[data-theme="dark"] .mail-card,
+:root[data-theme="dark"] .mail-utility-dialog,
+:root[data-theme="dark"] .account-panel,
+:root[data-theme="dark"] .card-btn { border-color: var(--border); }
+:root[data-theme="dark"] .mail-search input { border-color: #4a4d55; }
+:root[data-theme="dark"] .page-title h2,
+:root[data-theme="dark"] .mail-item.unread .subject { color: var(--text); }
+:root[data-theme="dark"] .profile-menu .btn,
+:root[data-theme="dark"] .account-menu summary,
+:root[data-theme="dark"] .mail-chip,
+:root[data-theme="dark"] .mail-signature-link,
+:root[data-theme="dark"] .mail-extra-tools button { color: var(--text-muted); }
+:root[data-theme="dark"] .mail-chip.active,
+:root[data-theme="dark"] .mail-utility-dialog button { color: #ff9aa6; }
+:root[data-theme="dark"] .mail-utility-dialog a { color: #ff9aa6; }
+:root[data-theme="dark"] .mail-utility-dialog input { background: var(--bg); color: var(--text); border-color: #4a4d55; }
+:root[data-theme="dark"] .mail-utility-dialog { border-top-color: var(--navy); }
+:root[data-theme="dark"] .mail-snack button { color: #ffb3bb; }
+:root[data-theme="dark"] .tu-toast { background: #2c2e34; color: #f2f2f4; border: 1px solid #44464d; }
+
+/* Logo is dark artwork on white: give it a light plate rather than recolouring it. */
+:root[data-theme="dark"] .tu-header-logo,
+:root[data-theme="dark"] .university-logo { background: #fff; padding: 4px 8px; border-radius: 3px; }
+
+/* The writing surface and message bodies keep a white page. */
+:root[data-theme="dark"] .cmp-editor-wrap,
+:root[data-theme="dark"] .sig-editor-wrap iframe,
+:root[data-theme="dark"] .msg-frame { background: #fff; color-scheme: light; }
+:root[data-theme="dark"] .msg-frame { border-radius: 2px; }
+
+/* Controls with their own light fills. */
+:root[data-theme="dark"] .cmp-toolbar button,
+:root[data-theme="dark"] .mail-icon-btn { color: var(--text-muted); }
+:root[data-theme="dark"] .cmp-toolbar button:hover,
+:root[data-theme="dark"] .mail-icon-btn:hover { background: #2a2c31; color: var(--text); }
+:root[data-theme="dark"] .cmp-chip { background: var(--bg-2); color: var(--text); }
+:root[data-theme="dark"] .cmp-chip.invalid,
+:root[data-theme="dark"] .draft-tag { background: var(--danger-tint); color: #ff9aa0; }
+:root[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]),
+:root[data-theme="dark"] select,
+:root[data-theme="dark"] textarea { background-color: var(--bg); color: var(--text); border-color: #4a4d55; }
+:root[data-theme="dark"] ::placeholder { color: var(--text-faint); }
+:root[data-theme="dark"] .mail-skeleton .sk { background: linear-gradient(90deg, var(--bg-2) 25%, #26282d 37%, var(--bg-2) 63%); background-size: 400% 100%; }
+
+/* Sign-in page. */
+:root[data-theme="dark"] .service-name,
+:root[data-theme="dark"] .intro,
+:root[data-theme="dark"] footer { color: var(--text-muted); }
+:root[data-theme="dark"] footer { border-top-color: var(--border); }
+:root[data-theme="dark"] #error { color: #ff8f94; }
+:root[data-theme="dark"] input:hover { border-color: #888b93; }
+:root[data-theme="dark"] .site-header { border-bottom-color: var(--navy); }
+:root[data-theme="dark"] button[type="submit"]#submit { background: var(--navy); border-color: var(--navy); color: #fff; }

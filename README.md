@@ -4,6 +4,8 @@ Open-source webmail client for TU Darmstadt mailboxes (MIT). It talks to the uni
 
 Features: folders, search, threads, compose/reply/forward, attachments, drafts, move/archive/delete, calendar invitations, contacts and signatures. Mail actions operate on the real mailbox after sign-in. Background push notifications are not included.
 
+Interface: English and German (follows the browser language, switchable in the account menu or on the sign-in page), light, dark and system themes, keyboard shortcuts (press `?` for the list), print view for the open message, skip link, labelled landmarks and visible keyboard focus, installable as an app (offline shell only; mail is never cached), and operator branding.
+
 ## Quick start (local, one user)
 
 Requires Node.js 20 or later.
@@ -29,13 +31,16 @@ All settings are environment variables (or a `.env` file; never put passwords in
 | `TRUST_PROXY` | Number of reverse proxies in front of the server (usually `1`), or an IP/CIDR list. Needed so per-client login limits see real client addresses. `true` is rejected on purpose. |
 | `BIND_HOST`, `PORT` | Listen address and port. Defaults: `0.0.0.0` when `PUBLIC_URL` is set, otherwise `127.0.0.1`; port `3210`. |
 | `MAIL_EMAIL_DOMAIN` | Only addresses on this domain (and subdomains) may sign in. Default `tu-darmstadt.de`. |
-| `MAIL_PROFILES` | JSON replacing the mailbox types and IMAP hosts offered at sign-in. |
+| `MAIL_PROFILES` | JSON replacing the built-in student mailbox (`imap.stud.tu-darmstadt.de`) with other IMAP hosts. The first entry, or `student`, is used. |
 | `MAIL_IMAP_HOST`, `MAIL_IMAP_PORT`, `MAIL_SMTP_HOST`, `MAIL_SMTP_PORT`, `MAIL_*_SECURE` | Mail servers. Defaults point at TU Darmstadt student mail; both connections verify TLS certificates. |
 | `TU_MAIL_DATA_DIR` | Directory for signatures, contacts and send-attempt records. Default `./data`. |
 | `LOGIN_IP_PER_MINUTE` | Login requests allowed per client address per minute. Default 10. |
 | `LOGIN_ACCOUNT_FAILURES`, `LOGIN_ACCOUNT_WINDOW_MINUTES` | Failed sign-ins allowed per mailbox inside the window. Defaults 5 and 15. |
 | `MAX_SESSIONS` | Upper bound on concurrent sessions. Default 2000. Further sign-ins get a "busy" response. |
 | `TU_MAIL_LOG=off` | Disable the JSON log (mainly for tests). |
+| `BRAND_NAME`, `BRAND_PRIMARY_COLOR`, `BRAND_HELP_URL`, `BRAND_FOOTER` | Name (max 40 characters), colour (`#rrggbb`), https help link and footer text shown on the pages and in the install manifest. Invalid values stop the server at startup. |
+| `BRAND_LOGO` | File name of a logo (`.svg`, `.png`, `.jpg`, `.webp`, max 512 KB) placed in `<TU_MAIL_DATA_DIR>/brand/`. |
+| `METRICS_TOKEN` | At least 16 characters. Turns on `GET /metrics` (Prometheus text format), which then requires `Authorization: Bearer <token>`. Without it the endpoint answers 404. The request must carry the public host name in its `Host` header. Metrics hold counts only: no addresses, paths or user data. |
 
 ### Docker
 
