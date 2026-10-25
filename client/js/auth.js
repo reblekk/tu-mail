@@ -3,13 +3,16 @@ function getToken(){return '';}
 function clearSession(){sessionStorage.removeItem('tu-mail-user');}
 function requireAuth(){try{const user=JSON.parse(sessionStorage.getItem('tu-mail-user'));if(user)return user;}catch{}location.replace('/');return null;}
 function accountHeaders(){try{return {'X-Mail-Account':JSON.parse(sessionStorage.getItem('tu-mail-user')).userId};}catch{return {};}}
+// How a person is shown in menus: their full name, or the address when no name is known (the sign-in name,
+// the TU-ID, is not a name).
+function personLabel(person){return person&&person.name&&person.name!==person.username?person.name:(person&&person.email)||'';}
 function canLeaveComposer(){if(window.composeIsOpen?.()){showToast('Close or save your message before switching accounts.');return false;}return true;}
 async function renderProfileMenu(user){
  const target=document.getElementById('profile-menu');
  const menu=document.createElement('details');menu.className='account-menu';
  const trigger=document.createElement('summary');trigger.innerHTML='<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3.2"/><path d="M5.8 19.2c1.2-2.6 3.6-4 6.2-4s5 1.4 6.2 4"/></svg>';trigger.setAttribute('aria-label','Account menu');trigger.title='Account';
  const panel=document.createElement('div');panel.className='account-panel';
- const name=document.createElement('strong');name.textContent=user.email;panel.append(name);
+ const name=document.createElement('strong');name.textContent=personLabel(user);name.title=user.email;panel.append(name);
  const button=(label,action)=>{const b=document.createElement('button');b.type='button';b.textContent=label;b.onclick=action;panel.append(b);return b;};
  const mailPage=document.body.dataset.page==='mail';
  button(mailPage?'Calendar':'Mail',()=>{if(canLeaveComposer())location.href=mailPage?'/calendar.html':'/mail.html';});
@@ -29,7 +32,7 @@ async function renderProfileMenu(user){
  button('Add another account',()=>{if(canLeaveComposer())location.href='/index.html?add=1';});
  button('Sign out of all accounts',async()=>{if(!canLeaveComposer())return;try{await fetch('/api/auth/logout',{method:'POST',headers:accountHeaders()});clearSession();location.replace('/');}catch{showToast('Could not sign out. Try again.','error');}});
  menu.append(trigger,panel);target.replaceChildren(menu);
- try {const response=await fetch('/api/auth/accounts',{headers:accountHeaders()});if(!response.ok)return;const data=await response.json();for(const account of data.accounts||[]){if(account.userId===user.userId)continue;button(account.email+' · '+account.profile,()=>{if(!canLeaveComposer())return;sessionStorage.setItem('tu-mail-user',JSON.stringify(account));location.href='/mail.html';});}}catch{}
+ try {const response=await fetch('/api/auth/accounts',{headers:accountHeaders()});if(!response.ok)return;const data=await response.json();for(const account of data.accounts||[]){if(account.userId===user.userId)continue;const entry=button(personLabel(account),()=>{if(!canLeaveComposer())return;sessionStorage.setItem('tu-mail-user',JSON.stringify(account));location.href='/mail.html';});entry.title=account.email;}}catch{}
  document.addEventListener('click',event=>{if(!menu.contains(event.target))menu.open=false;});
 }
 function showToast(message,type){const el=document.createElement('div');el.className='tu-toast';el.setAttribute('role',type==='error'?'alert':'status');el.textContent=message;document.body.append(el);setTimeout(()=>el.remove(),5000);}

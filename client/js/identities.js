@@ -84,7 +84,9 @@
       error.textContent = '';
       const identities = rows.map((r) => ({ name: r.name.value.trim(), address: r.address.value.trim() })).filter((i) => i.address);
       try {
-        cache = Promise.resolve(await mailFetch('/api/mail/identities', { method: 'PUT', body: JSON.stringify({ identities, displayName: nameInput.value.trim() }) }));
+        const saved = await mailFetch('/api/mail/identities', { method: 'PUT', body: JSON.stringify({ identities, displayName: nameInput.value.trim() }) });
+        cache = Promise.resolve(saved);
+        try { const stored = JSON.parse(sessionStorage.getItem('tu-mail-user')); stored.name = saved.own.name || stored.username; sessionStorage.setItem('tu-mail-user', JSON.stringify(stored)); } catch (e) { /* the menu updates on the next sign-in */ }
         toast('Send-as addresses saved');
         d.close();
       } catch (err) { error.textContent = err.message; }

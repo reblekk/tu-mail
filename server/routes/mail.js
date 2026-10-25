@@ -474,7 +474,10 @@ router.put('/identities', async (req, res) => {
     const body = req.body || {};
     const { identities: clean } = identities.sanitize(body.identities, { ownAddress: req.user.email, isAllowed: allowedEmail });
     const name = body.displayName === undefined ? undefined : displayName.clean(body.displayName);
-    res.json(senderView(req.user.email, await mailSettings.saveIdentities(req.user.email, clean, name)));
+    const view = senderView(req.user.email, await mailSettings.saveIdentities(req.user.email, clean, name));
+    // Menus show the name from the session, so keep it current (the TU-ID stands in when there is no name).
+    if (res.locals.session && res.locals.session.user) res.locals.session.user.name = view.own.name || req.user.username;
+    res.json(view);
   } catch (err) {
     sendError(res, err);
   }

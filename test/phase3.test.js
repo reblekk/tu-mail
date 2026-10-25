@@ -300,3 +300,29 @@ test('the Sent folder is shown as "Sent", only by name',async()=>{
  assert.equal(res.status,200);assert.equal(res.json().find(f=>f.path==='Sent Items').name,'Sent');
  assert.ok(!read('js/mail-compose.js').includes('saved to Sent Items'),'messages say Sent too');
 });
+
+test('menus show a person by name, not by address; the name follows changes',async()=>{
+ const auth=read('js/auth.js');
+ assert.match(auth,/function personLabel\(person\)/);
+ assert.match(auth,/name\.textContent=personLabel\(user\)/,'the account menu header uses the name');
+ assert.match(auth,/const entry=button\(personLabel\(account\)/,'other signed-in accounts are listed by name');
+ assert.ok(!/account\.email\+' · '\+account\.profile/.test(auth),'no "address · student" labels');
+ assert.match(auth,/entry\.title=account\.email/,'the address stays available as a tooltip');
+ // the same rule, run: a name that is just the TU-ID is not shown as a name
+ const label=new Function(auth.match(/function personLabel\(person\)\{[^\n]*\}/)[0]+';return personLabel;')();
+ assert.equal(label({name:'Sharvee Shabnam',username:'sh12abcd',email:'sharvee.shabnam@stud.tu-darmstadt.de'}),'Sharvee Shabnam');
+ assert.equal(label({name:'sh12abcd',username:'sh12abcd',email:'a@stud.tu-darmstadt.de'}),'a@stud.tu-darmstadt.de','the TU-ID is not a name');
+ assert.equal(label({username:'x',email:'a@b.de'}),'a@b.de');
+ assert.equal(label(null),'');
+ // server side: accounts in the session carry the name, and changing it updates the session
+ const srv=await start();
+ const login=await call(srv,{method:'POST',url:'/api/auth/login',headers:{Origin:ORIGIN},body:{email:'sh12abcd@stud.tu-darmstadt.de',username:'sh12abcd',password:'test-only-password',fullName:'Sharvee Shabnam'}});
+ const h={Cookie:login.headers['set-cookie'][0].split(';')[0],Origin:ORIGIN};
+ const accounts=()=>call(srv,{url:'/api/auth/accounts',headers:h}).then(r=>r.json().accounts[0]);
+ assert.equal((await accounts()).name,'Sharvee Shabnam');
+ await call(srv,{method:'PUT',url:'/api/mail/identities',headers:h,body:{identities:[],displayName:'Sharvee S. Shabnam'}});
+ assert.equal((await accounts()).name,'Sharvee S. Shabnam','the session follows a changed name');
+ await call(srv,{method:'PUT',url:'/api/mail/identities',headers:h,body:{identities:[],displayName:''}});
+ assert.equal((await accounts()).name,'sh12abcd','with no name at all the TU-ID stands in, and the menu then falls back to the address');
+ assert.ok(read('js/identities.js').includes("stored.name = saved.own.name || stored.username"),'the browser copy is updated too');
+});
