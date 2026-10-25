@@ -1,0 +1,6 @@
+# Caddy gets and renews the HTTPS certificate for this name by itself. The DNS record for it must point at
+# this server, and ports 80 and 443 must be open, before the first start.
+tuda-mail.de {
+	encode zstd gzip
+	reverse_proxy app:3210
+}

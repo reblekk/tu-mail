@@ -1,0 +1,31 @@
+# TUDa Mail behind Caddy (automatic HTTPS). Run from this folder: docker compose up -d --build
+# Only Caddy is reachable from outside; the app itself publishes no ports.
+name: tuda-mail
+services:
+  app:
+    build: ..
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      TRUST_PROXY: "1"        # exactly one proxy (Caddy) in front, so client addresses are the real ones
+    volumes:
+      - tu-mail-data:/data    # signatures, contacts, calendar, send records: keep this volume
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data      # certificates
+      - caddy-config:/config
+    depends_on:
+      - app
+
+volumes:
+  tu-mail-data:
+  caddy-data:
+  caddy-config:
