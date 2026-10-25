@@ -199,8 +199,8 @@ function call({port},{method='GET',url='/',headers={},body}={}){
 }
 const ORIGIN='http://localhost:3210';
 let seq=0;
-async function signIn(srv){
- const email='p2user'+(++seq)+'@stud.tu-darmstadt.de';
+async function signIn(srv,chosen){
+ const email=chosen||'p2user'+(++seq)+'@stud.tu-darmstadt.de';
  const res=await call(srv,{method:'POST',url:'/api/auth/login',headers:{Origin:ORIGIN},body:{email,username:'ab12cdef',password:'test-only-password'}});
  assert.equal(res.status,200);
  return {email,headers:{Cookie:res.headers['set-cookie'][0].split(';')[0],Origin:ORIGIN}};
@@ -241,6 +241,41 @@ test('routes: send uses a saved identity and refuses an unsaved one',async()=>{
  captured=null;
  const own=await send('','attempt-aaaaaaaaaaaaaaaaaaaa-3');
  assert.equal(own.status,200);assert.equal(captured.fromAddress,me.email);
+});
+
+const displayName=require('../server/services/display-name');
+test('display name: read from first.last addresses, never from an ID',()=>{
+ const f=displayName.fromEmail;
+ assert.equal(f('fahim.haque@stud.tu-darmstadt.de'),'Fahim Haque');
+ assert.equal(f('anna-lena.mueller@tu-darmstadt.de'),'Anna Lena Mueller');
+ assert.equal(f('max_mustermann@x.de'),'Max Mustermann');
+ assert.equal(f('Jörg.Müller@x.de'),'Jörg Müller');
+ for(const bad of ['fh97fijo@x.de','demo1234@x.de','j.doe@x.de','jane.doe2@x.de','a.b.c.d.e@x.de','@x.de','','x'])assert.equal(f(bad),'',JSON.stringify(bad)+' gives no name');
+ assert.equal(displayName.forPerson('fh97fijo@x.de','  Fahim \Ul\ <Haque> '),'Fahim Ul Haque','a chosen name is cleaned');
+ assert.equal(displayName.forPerson('fahim.haque@x.de',''),'Fahim Haque','empty choice falls back to the address');
+ assert.equal(displayName.forPerson('fh97fijo@x.de',''),'');
+ assert.equal(displayName.clean('x'.repeat(200)).length,80);
+});
+
+test('routes: outgoing mail carries a real name, never the TU-ID, and the person can change it',async()=>{
+ const srv=await start();const me=await signIn(srv,'fahim.haque@stud.tu-darmstadt.de');
+ const view=(await call(srv,{url:'/api/mail/identities',headers:me.headers})).json();
+ assert.equal(view.own.name,'Fahim Haque');assert.equal(view.suggested,'Fahim Haque');assert.equal(view.displayName,'');
+ let captured=null;smtp.sendMessage=async(creds,o)=>{captured=o;return {savedToSent:true};};
+ let n=0;
+ const send=async()=>{const form=new FormData();form.append('mode','new');form.append('sendAttempt','name-attempt-aaaaaaaaaaaaaaaa-'+(++n));form.append('to',JSON.stringify([{address:'x@example.com'}]));form.append('subject','Hi');form.append('html','<p>Hi</p>');
+  return fetch('http://127.0.0.1:'+srv.port+'/api/mail/send',{method:'POST',headers:{...me.headers,Origin:'http://127.0.0.1:'+srv.port},body:form});};
+ assert.equal((await send()).status,200);assert.equal(captured.fromName,'Fahim Haque');assert.notEqual(captured.fromName,'ab12cdef');
+ const put=(body)=>call(srv,{method:'PUT',url:'/api/mail/identities',headers:me.headers,body});
+ const chosen=await put({identities:[],displayName:'Dr. Fahim \Ul\ Haque'});
+ assert.equal(chosen.status,200);assert.equal(chosen.json().own.name,'Dr. Fahim Ul Haque');assert.equal(chosen.json().displayName,'Dr. Fahim Ul Haque');
+ assert.equal((await send()).status,200);assert.equal(captured.fromName,'Dr. Fahim Ul Haque');
+ await call(srv,{method:'PUT',url:'/api/mail/settings',headers:me.headers,body:{signatureHtml:'<p>x</p>',useOnNew:true,useOnReply:true}});
+ assert.equal((await call(srv,{url:'/api/mail/identities',headers:me.headers})).json().displayName,'Dr. Fahim Ul Haque','saving the signature keeps the name');
+ assert.equal((await put({identities:[]})).json().displayName,'Dr. Fahim Ul Haque','omitting the name keeps it');
+ assert.equal((await put({identities:[],displayName:''})).json().own.name,'Fahim Haque','an empty name returns to the automatic one');
+ const idOnly=await signIn(srv,'fh97fijo@stud.tu-darmstadt.de');
+ assert.equal((await call(srv,{url:'/api/mail/identities',headers:idOnly.headers})).json().own.name,'','an ID-style address gets no name rather than the ID');
 });
 
 test('routes: .eml export needs a session and is served as a download',async()=>{

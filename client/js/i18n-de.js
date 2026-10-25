@@ -348,12 +348,14 @@
     'These are automatic hints, not proof. Do not enter passwords or open attachments unless you are sure of the sender.': 'Dies sind automatische Hinweise, kein Beweis. Geben Sie keine Passwörter ein und öffnen Sie keine Anhänge, wenn Sie sich beim Absender nicht sicher sind.',
 
     // Send-as addresses
-    'Send-as addresses': 'Absenderadressen',
+    'Name and send-as addresses': 'Name und Absenderadressen',
+    'Your name': 'Ihr Name',
+    'Shown to recipients next to your address. Leave it empty to use the name from your address, if it has one.': 'Wird Empfängern neben Ihrer Adresse angezeigt. Lassen Sie das Feld leer, um den Namen aus Ihrer Adresse zu verwenden, falls sie einen enthält.',
     'Other addresses you may write from. Replies go to the address you pick; your mailbox still sends the message.': 'Weitere Adressen, von denen Sie schreiben dürfen. Antworten gehen an die gewählte Adresse; die Nachricht wird weiterhin über Ihr Postfach gesendet.',
     'Add address': 'Adresse hinzufügen',
     'Save': 'Speichern',
     'You can save up to 5 send-as addresses.': 'Sie können bis zu 5 Absenderadressen speichern.',
-    'Send-as addresses saved': 'Absenderadressen gespeichert',
+    'Send-as addresses saved': 'Absenderadressen und Name gespeichert',
 
     // Calendar and notifications
     'Calendar — TUDa Mail': 'Kalender — TUDa Mail',

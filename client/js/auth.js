@@ -18,7 +18,7 @@ async function renderProfileMenu(user){
   const undoButton=button(window.UndoSend?window.UndoSend.label():'Undo send: 10 s',()=>{if(window.UndoSend)undoButton.textContent=window.UndoSend.cycle();});
   const remindButton=button(window.MailReminders?window.MailReminders.label():'Reminders',()=>{menu.open=false;window.MailReminders?.showList();});window.MailReminders?.bindLabel(remindButton);
   const notifyButton=button(window.MailNotify?window.MailNotify.label():'Notifications: off',async()=>{if(window.MailNotify)notifyButton.textContent=await window.MailNotify.cycle();});
-  button('Send-as addresses',()=>{menu.open=false;window.MailIdentities?.edit();});
+  button('Name and send-as addresses',()=>{menu.open=false;window.MailIdentities?.edit();});
  }
  if(window.showShortcuts)button('Keyboard shortcuts',()=>{menu.open=false;window.showShortcuts();});
  if(mailPage)button('Print message',()=>{menu.open=false;if(typeof state!=='undefined'&&state.current)window.print();else showToast('Open a message first.');});

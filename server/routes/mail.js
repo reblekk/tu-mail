@@ -9,6 +9,7 @@ const { parseFilters } = require('../services/search-query');
 const identities = require('../services/identities');
 const translateService = require('../services/translate');
 const calendar = require('../services/calendar');
+const displayName = require('../services/display-name');
 const { allowedEmail } = require('../services/account-profiles');
 
 const router = express.Router();
@@ -296,7 +297,8 @@ router.post('/send', receiveMessage, async (req, res) => {
     const mode = ['reply', 'replyall', 'forward'].includes(body.mode) ? body.mode : 'new';
     const attachments = await gatherAttachments(req, creds);
 
-    const from = identities.resolve((await mailSettings.getSettings(req.user.email)).identities, body.fromAddress, { name: req.user.name || '', address: req.user.email });
+    const settings = await mailSettings.getSettings(req.user.email);
+    const from = identities.resolve(settings.identities, body.fromAddress, { name: displayName.forPerson(req.user.email, settings.displayName), address: req.user.email });
     const outgoing = {
       fromName: from.name,
       fromAddress: from.address,
@@ -341,7 +343,8 @@ router.post('/draft', receiveMessage, async (req, res) => {
   try {
     const body = req.body || {};
     const attachments = await gatherAttachments(req, creds);
-    const from = identities.resolve((await mailSettings.getSettings(req.user.email)).identities, body.fromAddress, { name: req.user.name || '', address: req.user.email });
+    const settings = await mailSettings.getSettings(req.user.email);
+    const from = identities.resolve(settings.identities, body.fromAddress, { name: displayName.forPerson(req.user.email, settings.displayName), address: req.user.email });
     const saved = await smtp.saveDraft(creds, {
       fromName: from.name,
       fromAddress: from.address,
@@ -447,10 +450,19 @@ router.post('/translate', async (req, res) => {
   }
 });
 
+// What the settings dialog and the compose window need to know about the sender.
+function senderView(email, settings) {
+  return {
+    own: { name: displayName.forPerson(email, settings.displayName), address: email },
+    identities: settings.identities || [],
+    displayName: settings.displayName || '',
+    suggested: displayName.fromEmail(email),
+  };
+}
+
 router.get('/identities', async (req, res) => {
   try {
-    const settings = await mailSettings.getSettings(req.user.email);
-    res.json({ own: { name: req.user.name || '', address: req.user.email }, identities: settings.identities || [] });
+    res.json(senderView(req.user.email, await mailSettings.getSettings(req.user.email)));
   } catch (err) {
     sendError(res, err);
   }
@@ -458,9 +470,10 @@ router.get('/identities', async (req, res) => {
 
 router.put('/identities', async (req, res) => {
   try {
-    const { identities: clean } = identities.sanitize((req.body || {}).identities, { ownAddress: req.user.email, isAllowed: allowedEmail });
-    const saved = await mailSettings.saveIdentities(req.user.email, clean);
-    res.json({ own: { name: req.user.name || '', address: req.user.email }, identities: saved.identities });
+    const body = req.body || {};
+    const { identities: clean } = identities.sanitize(body.identities, { ownAddress: req.user.email, isAllowed: allowedEmail });
+    const name = body.displayName === undefined ? undefined : displayName.clean(body.displayName);
+    res.json(senderView(req.user.email, await mailSettings.saveIdentities(req.user.email, clean, name)));
   } catch (err) {
     sendError(res, err);
   }

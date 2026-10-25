@@ -15,6 +15,7 @@
     if (old) old.remove();
     holder.hidden = false;
     const data = await load();
+    if (data.own && data.own.address) holder.textContent = data.own.name ? data.own.name + ' <' + data.own.address + '>' : data.own.address;
     if (!data.identities.length) return;
     const select = document.createElement('select');
     select.id = 'cmp-from-select';
@@ -41,9 +42,18 @@
     d.className = 'mail-utility-dialog';
     d.addEventListener('close', () => d.remove());
     const title = document.createElement('h2');
-    title.textContent = 'Send-as addresses';
+    title.textContent = 'Name and send-as addresses';
     const help = document.createElement('p');
     help.textContent = 'Other addresses you may write from. Replies go to the address you pick; your mailbox still sends the message.';
+    const nameLabel = document.createElement('label');
+    nameLabel.textContent = 'Your name';
+    nameLabel.setAttribute('for', 'idn-name');
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text'; nameInput.id = 'idn-name'; nameInput.maxLength = 80; nameInput.value = data.displayName || '';
+    nameInput.placeholder = data.suggested || 'Your name';
+    const nameHelp = document.createElement('p');
+    nameHelp.className = 'idn-hint';
+    nameHelp.textContent = 'Shown to recipients next to your address. Leave it empty to use the name from your address, if it has one.';
     const list = document.createElement('div');
     const error = document.createElement('p');
     error.setAttribute('role', 'alert');
@@ -74,7 +84,7 @@
       error.textContent = '';
       const identities = rows.map((r) => ({ name: r.name.value.trim(), address: r.address.value.trim() })).filter((i) => i.address);
       try {
-        cache = Promise.resolve(await mailFetch('/api/mail/identities', { method: 'PUT', body: JSON.stringify({ identities }) }));
+        cache = Promise.resolve(await mailFetch('/api/mail/identities', { method: 'PUT', body: JSON.stringify({ identities, displayName: nameInput.value.trim() }) }));
         toast('Send-as addresses saved');
         d.close();
       } catch (err) { error.textContent = err.message; }
@@ -82,7 +92,7 @@
     const close = document.createElement('button');
     close.type = 'button'; close.textContent = 'Close';
     close.addEventListener('click', () => d.close());
-    d.append(title, help, list, error, add, save, close);
+    d.append(title, nameLabel, nameInput, nameHelp, help, list, error, add, save, close);
     document.body.append(d);
     d.showModal();
   }

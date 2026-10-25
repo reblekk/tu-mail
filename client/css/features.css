@@ -52,3 +52,7 @@ body.can-translate .card-translate { display: inline-flex; }
 
 /* Links in the folder sidebar look like the buttons next to them. */
 a.mail-signature-link { display: flex; align-items: center; gap: 8px; text-decoration: none; color: inherit; }
+
+/* Name and send-as dialog. */
+.idn-hint { margin: 4px 0 16px; font-size: 12.5px; color: var(--text-muted); }
+.mail-utility-dialog label[for="idn-name"] { display: block; margin: 4px 0 2px; font-weight: 600; font-size: 13px; }
