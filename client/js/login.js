@@ -24,6 +24,21 @@
   emailInput.addEventListener('change', prefill);
   emailInput.addEventListener('blur', prefill);
 
+  // The server keeps the sign-in for hours, but sessionStorage is gone once the tab or browser closes.
+  // If the cookie is still good, pick the sign-in up again instead of asking for the password.
+  const resume = async () => {
+    if (new URLSearchParams(location.search).has('add')) return;
+    try {
+      const response = await fetch('/api/auth/accounts');
+      if (!response.ok) return;
+      const { accounts } = await response.json();
+      if (!accounts || !accounts.length) return;
+      sessionStorage.setItem('tu-mail-user', JSON.stringify(accounts[accounts.length - 1]));
+      location.replace('/mail.html');
+    } catch (e) { /* offline or blocked: show the form */ }
+  };
+  resume();
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const button = document.getElementById('submit'), error = document.getElementById('error');

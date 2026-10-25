@@ -1,6 +1,6 @@
 // Offline shell for the installed app. It stores only the static page files; anything under /api/ and
 // every non-GET request goes straight to the network, so no mail, session or user data is ever cached.
-const CACHE = 'tu-mail-shell-v1';
+const CACHE = 'tu-mail-shell-v2';
 const SHELL = [
   '/', '/index.html', '/mail.html', '/calendar.html', '/manifest.webmanifest',
   '/css/login.css', '/css/main.css', '/css/dashboard.css', '/css/mobile.css', '/css/mail.css', '/css/mail-compose.css',
