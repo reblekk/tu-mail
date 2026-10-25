@@ -20,7 +20,7 @@ function createApp(config = configModule.load()) {
   const { log: writeLog, requests, who } = logger.create({ enabled: config.logRequests });
   const limiter = createLoginLimiter(config.loginLimits);
   setInterval(() => limiter.sweep(), 60000).unref();
-  session.configure({ secureCookies: config.secureCookies, maxSessions: config.maxSessions });
+  session.configure({ secureCookies: config.secureCookies, maxSessions: config.maxSessions, sessionDays: config.sessionDays, sessionStore: config.sessionStore, secret: config.sessionSecret });
   const metrics = metricsModule.create({ token: config.metricsToken, sessions: session, limiter });
   // One call per notable event: it goes to the log and to the counters.
   const log = (event, fields = {}, label) => { writeLog(event, fields); metrics.count(event, label); };
