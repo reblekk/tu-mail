@@ -30,7 +30,7 @@ function load(env = process.env) {
     secureCookies: publicUrl ? publicUrl.protocol === 'https:' : false,
     hsts: publicUrl ? publicUrl.protocol === 'https:' : false,
     maxSessions: Number(env.MAX_SESSIONS) || 2000,
-    sessionDays: Number(env.SESSION_DAYS) || 365,
+    sessionDays: Number(env.SESSION_DAYS) || 30,
     sessionStore: env.SESSION_STORE === 'file' ? 'file' : 'memory',
     sessionSecret: env.SESSION_SECRET || '',
     loginLimits: {

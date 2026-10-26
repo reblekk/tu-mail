@@ -87,7 +87,8 @@ function create(req, res, user, password) {
 function verifyToken(req, res, next) {
   const session = lookup(req), account = selected(req, session);
   if (!account) return res.status(401).json({ error: 'Please sign in to this account again.' });
-  if (session.expires - Date.now() < ttl() - DAY) {
+  // Also shortens sign-ins made under a longer SESSION_DAYS than the one now in force.
+  if (session.expires - Date.now() < ttl() - DAY || session.expires - Date.now() > ttl()) {
     session.expires = Date.now() + ttl();
     cookie(res, req, id(req));
     persist();
