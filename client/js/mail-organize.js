@@ -7,17 +7,14 @@
 
   // ------------------------------------------------------------------ pop-up menu
 
-  let openMenu = null;
+  let openMenu = null, stopWatching = null;
   function closeMenu() {
     if (!openMenu) return;
     openMenu.remove();
     openMenu = null;
-    document.removeEventListener('mousedown', onOutside, true);
-    document.removeEventListener('keydown', onMenuKey, true);
+    if (stopWatching) { stopWatching(); stopWatching = null; }
     window.removeEventListener('scroll', closeMenu, true);
   }
-  function onOutside(e) { if (openMenu && !openMenu.contains(e.target)) closeMenu(); }
-  function onMenuKey(e) { if (e.key === 'Escape') { e.stopPropagation(); closeMenu(); } }
 
   window.openPopupMenu = function openPopupMenu(anchor, items) {
     closeMenu();
@@ -42,11 +39,8 @@
       item.run();
     });
     openMenu = menu;
-    setTimeout(() => {
-      document.addEventListener('mousedown', onOutside, true);
-      document.addEventListener('keydown', onMenuKey, true);
-      window.addEventListener('scroll', closeMenu, true);
-    }, 0);
+    stopWatching = window.TuOutside.watch(menu, closeMenu);
+    setTimeout(() => window.addEventListener('scroll', closeMenu, true), 0);
   };
 
   // ------------------------------------------------------------------ dialogs
@@ -209,13 +203,16 @@
 
   const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 
-  window.actArchive = (items) => performMove(items, { toRole: 'archive', label: (n) => `${plural(n, 'message', 'messages')} archived` });
+  // In Archive or Deleted Items the same button, key and bulk action puts the messages back in the Inbox.
+  window.actArchive = (items) => ['archive', 'trash'].includes(role(items[0])) ? actRestore(items) : performMove(items, { toRole: 'archive', label: (n) => `${plural(n, 'message', 'messages')} archived` });
   window.actMove = async (items) => {
     const to = await pickFolder({ exclude: [items[0].folder], title: items.length === 1 ? 'Move message to' : `Move ${items.length} messages to` });
     if (!to) return;
     const name = (state.folders.find((f) => f.path === to) || {}).name || 'folder';
     performMove(items, { to, label: (n) => `${plural(n, 'message', 'messages')} moved to ${name}` });
   };
+  // Deleted Items only: put the messages back in the Inbox.
+  window.actRestore = (items) => performMove(items, { toRole: 'inbox', label: (n) => `${plural(n, 'message', 'messages')} moved to Inbox` });
   window.actSpam = (items) => {
     const fromJunk = role(items[0]) === 'junk';
     return performMove(items, { toRole: fromJunk ? 'inbox' : 'junk', label: (n) => (fromJunk ? `${plural(n, 'message', 'messages')} moved to Inbox` : `${plural(n, 'message', 'messages')} marked as spam`) });

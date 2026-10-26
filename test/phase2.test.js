@@ -74,27 +74,7 @@ test('safety: display name, reply-to and links',()=>{
  assert.equal(safety.registrable('mail.example.co.uk'),'example.co.uk');assert.equal(safety.registrable('www.tu-darmstadt.de'),'tu-darmstadt.de');
 });
 
-// ---------------------------------------------------------------- reminders and message tools
-const reminders=require('../client/js/reminders.js');
-test('reminders: presets, due selection and stored data cleaning',()=>{
- const now=new Date(2026,9,26,10,0,0).getTime(); // Monday 10:00
- const list=reminders.presets(now);
- assert.deepEqual(list.map(p=>p.label),['In 1 hour','This evening','Tomorrow morning','Next week']);
- assert.equal(list[0].due,now+3600000);
- assert.equal(new Date(list[1].due).getHours(),18);
- assert.equal(new Date(list[2].due).getDate(),27);assert.equal(new Date(list[2].due).getHours(),8);
- assert.equal(new Date(list[3].due).getDay(),1,'next week is the coming Monday');
- assert.ok(list[3].due>now+6*86400000);
- const sunday=reminders.presets(new Date(2026,9,25,12,0,0).getTime());
- assert.equal(new Date(sunday[3].due).getDay(),1);
- assert.ok(sunday[3].due>sunday[2].due+86400000,'on a Sunday, next week is not tomorrow');
- const late=reminders.presets(new Date(2026,9,26,17,50,0).getTime());
- assert.ok(!late.some(p=>p.label==='This evening'),'no "this evening" when it is nearly evening');
- assert.deepEqual(reminders.dueNow([{due:5},{due:50}],10).map(r=>r.due),[5]);
- const clean=reminders.clean([{due:1,uid:2,folder:'INBOX',subject:'s'},{due:'x',uid:1,folder:'a'},null,{due:2,uid:'3',folder:'a'},{due:3,uid:4,folder:'INBOX',subject:'y'.repeat(500)}]);
- assert.equal(clean.length,2);assert.equal(clean[1].subject.length,200);
- assert.deepEqual(reminders.clean('nope'),[]);
-});
+// ---------------------------------------------------------------- message tools
 const tools=require('../client/js/message-tools.js');
 test('translation batching and whitespace handling',()=>{
  assert.deepEqual(tools.batches(['a','b','c'],2,100),[[0,1],[2]]);
@@ -104,33 +84,7 @@ test('translation batching and whitespace handling',()=>{
  assert.deepEqual(tools.split('x'),{lead:'',core:'x',tail:''});
 });
 
-// ---------------------------------------------------------------- send-as identities
-const identities=require('../server/services/identities');
-const {allowedEmail}=require('../server/services/account-profiles');
-test('identities: validation and resolution',()=>{
- const ctx={ownAddress:'me@stud.tu-darmstadt.de',isAllowed:allowedEmail};
- const ok=identities.sanitize([{name:' Dr. "Me" <x> ',address:'Alias@TU-Darmstadt.de'},{name:'dup',address:'alias@tu-darmstadt.de'},{name:'self',address:'ME@stud.tu-darmstadt.de'}],ctx);
- assert.deepEqual(ok.identities,[{name:'Dr. Me x',address:'alias@tu-darmstadt.de'}],'cleaned, de-duplicated, own address dropped');
- assert.throws(()=>identities.sanitize([{address:'a@gmail.com'}],ctx),/not on a domain/);
- assert.throws(()=>identities.sanitize([{address:'not-an-address'}],ctx),/valid email/);
- assert.throws(()=>identities.sanitize('x',ctx),{status:400});
- assert.throws(()=>identities.sanitize(Array.from({length:6},(_,i)=>({address:'a'+i+'@tu-darmstadt.de'})),ctx),/up to 5/);
- const own={name:'Me',address:'me@stud.tu-darmstadt.de'};
- const saved=[{name:'Alias',address:'alias@tu-darmstadt.de'}];
- assert.deepEqual(identities.resolve(saved,'',own),own);
- assert.deepEqual(identities.resolve(saved,'ME@stud.tu-darmstadt.de',own),own);
- assert.deepEqual(identities.resolve(saved,'alias@tu-darmstadt.de',own),{name:'Alias',address:'alias@tu-darmstadt.de'});
- assert.deepEqual(identities.resolve([{name:'',address:'b@tu-darmstadt.de'}],'b@tu-darmstadt.de',own),{name:'Me',address:'b@tu-darmstadt.de'},'falls back to the account name');
- assert.throws(()=>identities.resolve(saved,'boss@tu-darmstadt.de',own),{status:400});
- const smtp=require('../server/services/mail-smtp');
- const creds={email:'me@stud.tu-darmstadt.de'};
- assert.deepEqual(smtp.fromHeader({fromName:'Me',fromAddress:'alias@tu-darmstadt.de'},creds),{name:'Me',address:'alias@tu-darmstadt.de'});
- assert.equal(smtp.fromHeader({},creds),'me@stud.tu-darmstadt.de');
- assert.deepEqual(smtp.senderHeader({fromAddress:'alias@tu-darmstadt.de'},creds),{sender:'me@stud.tu-darmstadt.de'},'the submitting account is named');
- assert.deepEqual(smtp.senderHeader({fromAddress:'ME@stud.tu-darmstadt.de'},creds),{});
- assert.deepEqual(smtp.senderHeader({},creds),{});
-});
-
+const displayName=require('../server/services/display-name');
 // ---------------------------------------------------------------- translation service
 const translate=require('../server/services/translate');
 function fakeTranslator(handler){
@@ -206,44 +160,6 @@ async function signIn(srv,chosen){
  return {email,headers:{Cookie:res.headers['set-cookie'][0].split(';')[0],Origin:ORIGIN}};
 }
 
-test('routes: identities are saved per person, validated, and survive signature saves',async()=>{
- const srv=await start();const me=await signIn(srv);
- const get=await call(srv,{url:'/api/mail/identities',headers:me.headers});
- assert.equal(get.status,200);assert.deepEqual(get.json().identities,[]);assert.equal(get.json().own.address,me.email);
- assert.equal((await call(srv,{url:'/api/mail/identities'})).status,401);
- const put=await call(srv,{method:'PUT',url:'/api/mail/identities',headers:me.headers,body:{identities:[{name:'Group',address:'group@tu-darmstadt.de'}]}});
- assert.equal(put.status,200);assert.equal(put.json().identities[0].address,'group@tu-darmstadt.de');
- assert.equal((await call(srv,{method:'PUT',url:'/api/mail/identities',headers:me.headers,body:{identities:[{address:'x@gmail.com'}]}})).status,400);
- assert.equal((await call(srv,{method:'PUT',url:'/api/mail/identities',headers:me.headers,body:{identities:'no'}})).status,400);
- const sig=await call(srv,{method:'PUT',url:'/api/mail/settings',headers:me.headers,body:{signatureHtml:'<p>Regards</p>',useOnNew:true,useOnReply:true}});
- assert.equal(sig.status,200);
- assert.equal((await call(srv,{url:'/api/mail/identities',headers:me.headers})).json().identities.length,1,'saving the signature keeps identities');
- assert.equal((await call(srv,{url:'/api/mail/settings',headers:me.headers})).json().signatureHtml,'<p>Regards</p>');
- const other=await signIn(srv);
- assert.deepEqual((await call(srv,{url:'/api/mail/identities',headers:other.headers})).json().identities,[],'another person does not see them');
-});
-
-test('routes: send uses a saved identity and refuses an unsaved one',async()=>{
- const srv=await start();const me=await signIn(srv);
- await call(srv,{method:'PUT',url:'/api/mail/identities',headers:me.headers,body:{identities:[{name:'Group',address:'group@tu-darmstadt.de'}]}});
- let captured=null;
- smtp.sendMessage=async(creds,outgoing)=>{captured=outgoing;return {savedToSent:true};};
- const send=async(fromAddress,attempt)=>{
-  const form=new FormData();
-  form.append('mode','new');form.append('sendAttempt',attempt);form.append('to',JSON.stringify([{address:'x@example.com'}]));form.append('subject','Hi');form.append('html','<p>Hi</p>');
-  if(fromAddress)form.append('fromAddress',fromAddress);
-  return fetch('http://127.0.0.1:'+srv.port+'/api/mail/send',{method:'POST',headers:{...me.headers,Origin:'http://127.0.0.1:'+srv.port},body:form});
- };
- const bad=await send('boss@tu-darmstadt.de','attempt-aaaaaaaaaaaaaaaaaaaa-1');
- assert.equal(bad.status,400);assert.equal(captured,null,'nothing was submitted');
- const ok=await send('group@tu-darmstadt.de','attempt-aaaaaaaaaaaaaaaaaaaa-2');
- assert.equal(ok.status,200);assert.equal(captured.fromAddress,'group@tu-darmstadt.de');assert.equal(captured.fromName,'Group');
- captured=null;
- const own=await send('','attempt-aaaaaaaaaaaaaaaaaaaa-3');
- assert.equal(own.status,200);assert.equal(captured.fromAddress,me.email);
-});
-
-const displayName=require('../server/services/display-name');
 test('display name: read from first.last addresses, never from an ID',()=>{
  const f=displayName.fromEmail;
  assert.equal(f('fahim.haque@stud.tu-darmstadt.de'),'Fahim Haque');
@@ -257,25 +173,15 @@ test('display name: read from first.last addresses, never from an ID',()=>{
  assert.equal(displayName.clean('x'.repeat(200)).length,80);
 });
 
-test('routes: outgoing mail carries a real name, never the TU-ID, and the person can change it',async()=>{
+test('routes: outgoing mail carries a real name, never the TU-ID',async()=>{
  const srv=await start();const me=await signIn(srv,'fahim.haque@stud.tu-darmstadt.de');
- const view=(await call(srv,{url:'/api/mail/identities',headers:me.headers})).json();
- assert.equal(view.own.name,'Fahim Haque');assert.equal(view.suggested,'Fahim Haque');assert.equal(view.displayName,'');
  let captured=null;smtp.sendMessage=async(creds,o)=>{captured=o;return {savedToSent:true};};
  let n=0;
- const send=async()=>{const form=new FormData();form.append('mode','new');form.append('sendAttempt','name-attempt-aaaaaaaaaaaaaaaa-'+(++n));form.append('to',JSON.stringify([{address:'x@example.com'}]));form.append('subject','Hi');form.append('html','<p>Hi</p>');
-  return fetch('http://127.0.0.1:'+srv.port+'/api/mail/send',{method:'POST',headers:{...me.headers,Origin:'http://127.0.0.1:'+srv.port},body:form});};
- assert.equal((await send()).status,200);assert.equal(captured.fromName,'Fahim Haque');assert.notEqual(captured.fromName,'ab12cdef');
- const put=(body)=>call(srv,{method:'PUT',url:'/api/mail/identities',headers:me.headers,body});
- const chosen=await put({identities:[],displayName:'Dr. Fahim \Ul\ Haque'});
- assert.equal(chosen.status,200);assert.equal(chosen.json().own.name,'Dr. Fahim Ul Haque');assert.equal(chosen.json().displayName,'Dr. Fahim Ul Haque');
- assert.equal((await send()).status,200);assert.equal(captured.fromName,'Dr. Fahim Ul Haque');
- await call(srv,{method:'PUT',url:'/api/mail/settings',headers:me.headers,body:{signatureHtml:'<p>x</p>',useOnNew:true,useOnReply:true}});
- assert.equal((await call(srv,{url:'/api/mail/identities',headers:me.headers})).json().displayName,'Dr. Fahim Ul Haque','saving the signature keeps the name');
- assert.equal((await put({identities:[]})).json().displayName,'Dr. Fahim Ul Haque','omitting the name keeps it');
- assert.equal((await put({identities:[],displayName:''})).json().own.name,'Fahim Haque','an empty name returns to the automatic one');
+ const send=async(h)=>{const form=new FormData();form.append('mode','new');form.append('sendAttempt','name-attempt-aaaaaaaaaaaaaaaa-'+(++n));form.append('to',JSON.stringify([{address:'x@example.com'}]));form.append('subject','Hi');form.append('html','<p>Hi</p>');
+  return fetch('http://127.0.0.1:'+srv.port+'/api/mail/send',{method:'POST',headers:{...h,Origin:'http://127.0.0.1:'+srv.port},body:form});};
+ assert.equal((await send(me.headers)).status,200);assert.equal(captured.fromName,'Fahim Haque');assert.notEqual(captured.fromName,'ab12cdef');
  const idOnly=await signIn(srv,'fh97fijo@stud.tu-darmstadt.de');
- assert.equal((await call(srv,{url:'/api/mail/identities',headers:idOnly.headers})).json().own.name,'','an ID-style address gets no name rather than the ID');
+ assert.equal((await send(idOnly.headers)).status,200);assert.equal(captured.fromName,'','an ID-style address gets no name rather than the ID');
 });
 
 test('routes: .eml export needs a session and is served as a download',async()=>{
@@ -329,7 +235,7 @@ test('every client script compiles, and the offline shell lists every local file
  for(const f of fs.readdirSync(path.join(client,'js')))new vm.Script(read('js/'+f),{filename:f});
  new vm.Script(read('sw.js'),{filename:'sw.js'});
  const sw=read('sw.js');
- for(const page of ['index.html','mail.html','calendar.html']){
+ for(const page of ['index.html','mail.html']){
   for(const m of read(page).matchAll(/(?:src|href)="((?:css|js|assets)\/[^"]+)"/g)){
    if(m[1].endsWith('.svg')||m[1].endsWith('.png')&&!m[1].includes('icon-192'))continue;
    assert.ok(sw.includes("'/"+m[1]+"'"),page+' loads '+m[1]+' but the service worker does not cache it');
@@ -339,15 +245,15 @@ test('every client script compiles, and the offline shell lists every local file
 
 test('the mail page carries the new controls, loaded in a safe order',()=>{
  const mail=read('mail.html');
- for(const id of ['chip-filters','mail-filter-panel','flt-from','flt-to','flt-subject','flt-since','flt-before','flt-attach','flt-flagged','flt-reset','saved-list','saved-name','saved-save','msg-remind','msg-export'])assert.ok(mail.includes('id="'+id+'"'),'missing #'+id);
+ for(const id of ['chip-filters','mail-filter-panel','flt-from','flt-to','flt-subject','flt-since','flt-before','flt-attach','flt-flagged','flt-reset','saved-list','saved-name','saved-save','msg-export'])assert.ok(mail.includes('id="'+id+'"'),'missing #'+id);
  const order=f=>mail.indexOf('js/'+f);
- for(const early of ['safety.js','undo-send.js','reminders.js'])assert.ok(order(early)<order('auth.js'),early+' must load before the account menu is built');
- for(const late of ['mail-search.js','identities.js','message-tools.js'])assert.ok(order(late)>order('mail-app.js'),late+' needs the app globals');
+ for(const early of ['safety.js','undo-send.js'])assert.ok(order(early)<order('auth.js'),early+' must load before the account menu is built');
+ for(const late of ['mail-search.js','message-tools.js'])assert.ok(order(late)>order('mail-app.js'),late+' needs the app globals');
  assert.ok(read('js/mail-thread.js').includes('class="safety-slot"'));
  assert.ok(read('js/mail-thread.js').includes('data-act="translate"'));
  assert.ok(read('js/mail-compose.js').includes('window.UndoSend.wait()'));
  const shortcuts=read('js/shortcuts.js');
- for(const key of ["['b'","['x'"])assert.ok(shortcuts.includes(key));
+ for(const key of ["['x'"])assert.ok(shortcuts.includes(key));
 });
 
 test('German covers the new strings, including patterns',()=>{
@@ -356,8 +262,6 @@ test('German covers the new strings, including patterns',()=>{
  const t=s=>i18n.t(s);
  assert.equal(t('Filters (3)'),'Filter (3)');
  assert.equal(t('Undo send: 20 s'),'Senden rückgängig: 20 s');assert.equal(t('Sending in 7 s…'),'Senden in 7 s …');
- assert.equal(t('In 1 hour · Mon, 26 Oct, 11:00 AM'),'In 1 Stunde · Mon, 26 Oct, 11:00 AM');
- assert.equal(t('Reminders (2)'),'Erinnerungen (2)');
  assert.equal(t('Translated to English from German.'),'Ins Englische übersetzt (aus: German).');
  assert.match(t('Translated to English from German. Only the first part of this long message was translated.'),/Nur der erste Teil/);
  assert.equal(t('A link shows "https://a.de" but leads to evil.org.'),'Ein Link zeigt „https://a.de“, führt aber zu evil.org.');
@@ -369,31 +273,31 @@ test('sign-in: the full name typed at login becomes the sender name, but only af
  const srv=await start();
  const login=(email,password,fullName)=>call(srv,{method:'POST',url:'/api/auth/login',headers:{Origin:ORIGIN},body:{email,username:'ab12cdef',password,...(fullName===undefined?{}:{fullName})}});
  const session=res=>({Cookie:res.headers['set-cookie'][0].split(';')[0],Origin:ORIGIN});
- const view=h=>call(srv,{url:'/api/mail/identities',headers:h}).then(r=>r.json());
+ const view=h=>call(srv,{url:'/api/mail/settings',headers:h}).then(r=>r.json());
  const email='fh12abcd@stud.tu-darmstadt.de'; // an ID-style address: no name can be read from it
  const wrong=await login(email,'wrong-password','Not Saved');
  assert.equal(wrong.status,401);
  const first=await login(email,'test-only-password','  Fahim  Ul   Haque ');
  assert.equal(first.status,200);assert.equal(first.json().user.name,'Fahim Ul Haque','the session shows the name, not the TU-ID');
  let v=await view(session(first));
- assert.equal(v.own.name,'Fahim Ul Haque');assert.equal(v.displayName,'Fahim Ul Haque');
+ assert.equal(v.displayName,'Fahim Ul Haque');
  const blank=await login(email,'test-only-password','');
  assert.equal(blank.json().user.name,'Fahim Ul Haque','leaving it empty keeps the saved name');
  const none=await login(email,'test-only-password');
  assert.equal(none.json().user.name,'Fahim Ul Haque','API clients that send no name are unaffected');
  const changed=await login(email,'test-only-password','Fahim Haque');
- assert.equal((await view(session(changed))).own.name,'Fahim Haque','a new name replaces the old one');
+ assert.equal((await view(session(changed))).displayName,'Fahim Haque','a new name replaces the old one');
  const junk=await login(email,'test-only-password','12345 !!!');
  assert.equal(junk.json().user.name,'Fahim Haque','a name without letters is ignored');
  const ctrl=await login(email,'test-only-password','Fa\u0000him\n"Haque"');
- assert.equal((await view(session(ctrl))).own.name,'Fa him Haque');
+ assert.equal((await view(session(ctrl))).displayName,'Fa him Haque');
  const long=await login(email,'test-only-password','A'.repeat(300));
- assert.equal((await view(session(long))).own.name.length,80);
+ assert.equal((await view(session(long))).displayName.length,80);
  const fresh=await login('anna.schmidt@stud.tu-darmstadt.de','test-only-password');
  assert.equal(fresh.json().user.name,'Anna Schmidt','with no typed name, one is read from a first.last address');
  const idOnly=await login('zz99qqrr@stud.tu-darmstadt.de','test-only-password');
  assert.equal(idOnly.json().user.name,'ab12cdef','nothing to show: the UI falls back to the TU-ID, mail goes out without a name');
- assert.equal((await view(session(idOnly))).own.name,'');
+ assert.equal((await view(session(idOnly))).displayName,'');
 });
 
 test('sign-in page asks for the full name and sends it',()=>{

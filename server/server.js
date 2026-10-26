@@ -107,7 +107,7 @@ async function rememberName(address, typed) {
   try {
     let saved = await mailSettings.getSettings(address);
     const name = displayName.clean(typed);
-    if (name && /\p{L}/u.test(name) && name !== saved.displayName) saved = await mailSettings.saveIdentities(address, saved.identities || [], name);
+    if (name && /\p{L}/u.test(name) && name !== saved.displayName) saved = await mailSettings.saveDisplayName(address, name);
     return displayName.forPerson(address, saved.displayName);
   } catch {
     return '';

@@ -1,6 +1,6 @@
 // Keyboard shortcuts that sit on top of the ones in mail-app.js (j/k, c, r, a, u, f, /, Esc) and
-// mail-organize.js (e, Delete): "?" opens the list, "g" then "i" goes to the Inbox, "p" prints. "b" (reminders) and
-// "x" (export) live in reminders.js and message-tools.js and are listed here so the help is complete.
+// mail-organize.js (e, Delete): "?" opens the list, "g" then "i" goes to the Inbox, "p" prints. "x" (export) lives in
+// message-tools.js and is listed here so the help is complete.
 (function () {
   const ROWS = [
     ['j / ↓', 'Move down the list'],
@@ -13,7 +13,6 @@
     ['e', 'Archive the open message'],
     ['Delete', 'Delete the open message'],
     ['p', 'Print message'],
-    ['b', 'Remind me'],
     ['x', 'Export as .eml'],
     ['/', 'Search'],
     ['g then i', 'Go to Inbox'],

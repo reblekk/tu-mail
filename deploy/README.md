@@ -20,7 +20,7 @@ Needs: an Ubuntu 24.04 server with a public IP, a domain name (tuda-mail.de), ab
 ## Day to day
 - Logs: `docker compose logs -f app` (one JSON line per event; no passwords or mail content)
 - Update: `git pull && docker compose up -d --build`
-- Backup of signatures, contacts and calendars:
+- Backup of signatures and contacts:
   `docker run --rm -v tuda-mail_tu-mail-data:/data -v "$PWD":/backup alpine tar czf /backup/data-$(date +%F).tgz -C /data .`
 - Restart: `docker compose restart app` (signs everyone out; sessions live in memory by design)
 - Keep the server updated: `sudo apt-get update && sudo apt-get -y upgrade`, and enable automatic security updates

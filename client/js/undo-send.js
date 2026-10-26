@@ -3,7 +3,7 @@
 (function () {
   const KEY = 'tu-mail-undo-seconds';
   const OPTIONS = [0, 5, 10, 20, 30];
-  const DEFAULT = 10;
+  const DEFAULT = 0;
 
   function seconds() {
     try {

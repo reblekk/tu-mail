@@ -23,9 +23,12 @@
     chip.classList.toggle('active', n > 0);
     chip.textContent = n ? 'Filters (' + n + ')' : 'Filters';
   }
+  let stopWatching = null;
   function setOpen(open) {
     panel.hidden = !open;
     chip.setAttribute('aria-expanded', String(open));
+    if (stopWatching) { stopWatching(); stopWatching = null; }
+    if (open) stopWatching = window.TuOutside.watch((t) => panel.contains(t) || chip.contains(t), () => setOpen(false), [panel, chip]);
   }
   function apply(filters) {
     state.filters = filters;

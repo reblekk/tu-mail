@@ -513,8 +513,6 @@
     form.append('cc', JSON.stringify(c.fields.cc.values()));
     form.append('bcc', JSON.stringify(c.fields.bcc.values()));
     form.append('subject', $c('cmp-subject').value.trim());
-    const fromAddress = window.MailIdentities ? window.MailIdentities.chosen() : '';
-    if (fromAddress) form.append('fromAddress', fromAddress);
     form.append('html', editorBodyHtml());
     if (c.prep && c.mode !== 'forward') {
       form.append('inReplyTo', c.prep.inReplyTo || '');
@@ -654,7 +652,7 @@
     c.fields = { to: new RecipientField($c('cmp-to'), 'to'), cc: new RecipientField($c('cmp-cc'), 'cc'), bcc: new RecipientField($c('cmp-bcc'), 'bcc') };
 
     $c('cmp-close').addEventListener('click', requestClose);
-    $c('cmp-back').addEventListener('click', requestClose);
+    $c('cmp-back').addEventListener('click', discardDraft);
     $c('cmp-discard').addEventListener('click', discardDraft);
     $c('cmp-send').addEventListener('click', sendNow);
     $c('cmp-send-phone').addEventListener('click', sendNow);
@@ -761,9 +759,9 @@
     c.uid = options.uid || null;
     $c('cmp-title').textContent = TITLES[mode] || 'New message';
     $c('cmp-from').textContent = user.name ? `${user.name} <${user.email}>` : user.email;
-    if (window.MailIdentities) window.MailIdentities.decorate($c('cmp-from')).catch(() => {});
     $c('compose-overlay').hidden = false;
     document.documentElement.classList.add('cmp-open');
+    trapBack();
 
     let bodyHtml = '<div><br></div>';
     if (mode === 'draft') {
@@ -846,8 +844,30 @@
 
   // ------------------------------------------------------------------ closing / sending
 
+  // The browser's (or phone's) Back button must not drop a message being written. While the writing window is
+  // open there is one extra history entry just above the page's own; Back lands on the page's entry, the entry is put
+  // back, and the "Discard this message?" question is asked instead of leaving.
+  let backTrapped = false, backReleasing = false;
+  function trapBack() {
+    if (backTrapped) return;
+    backTrapped = true;
+    history.pushState({ cmp: 1 }, '', location.href);
+  }
+  function releaseBack() {
+    if (!backTrapped) return;
+    backTrapped = false;
+    if (history.state && history.state.cmp) { backReleasing = true; history.back(); }
+  }
+  window.addEventListener('popstate', () => {
+    if (backReleasing) { backReleasing = false; return; }
+    if (!backTrapped || !window.composeIsOpen || !window.composeIsOpen()) return;
+    history.pushState({ cmp: 1 }, '', location.href);
+    discardDraft();
+  });
+
   function closeNow() {
     openToken += 1;
+    releaseBack();
     $c('compose-overlay').hidden = true;
     document.documentElement.classList.remove('cmp-open');
     c.editorDoc = null;
@@ -979,6 +999,7 @@
       if (typeof window.mailPendingDone === 'function') window.mailPendingDone(pending);
       $c('compose-overlay').hidden = false;
       document.documentElement.classList.add('cmp-open');
+      trapBack();
       setSending(false);
       $c('cmp-status').textContent = 'Sending cancelled — your message is back in the editor';
       toast('Sending cancelled — your message is back in the editor');
@@ -1001,6 +1022,7 @@
       if (typeof window.mailPendingDone === 'function') window.mailPendingDone(pending);
       $c('compose-overlay').hidden = false;
       document.documentElement.classList.add('cmp-open');
+      trapBack();
       setSending(false);
       c.sendUncertain = !err.code || ['SEND_UNKNOWN','MAIL_CONNECT'].includes(err.code);
       await preserveRecovery().catch(()=>{});

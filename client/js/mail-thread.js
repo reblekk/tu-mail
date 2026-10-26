@@ -420,6 +420,9 @@
     $('msg-unread').querySelector('.label').textContent = m.seen ? 'Mark unread' : 'Mark read';
     const role = (currentFolder() || {}).role;
     $('msg-spam').querySelector('.label').textContent = role === 'junk' ? 'Not spam' : 'Spam';
+    const archive = $('msg-archive');
+    archive.querySelector('.label').textContent = role === 'trash' ? 'Restore' : role === 'archive' ? 'Unarchive' : 'Archive';
+    archive.title = role === 'trash' ? 'Restore to Inbox' : role === 'archive' ? 'Move back to Inbox (E)' : 'Archive (E)';
   };
 
   window.openMessage = async function openMessage(uid) {
@@ -507,7 +510,7 @@
       { label: 'Reply all', run: () => startCompose({ mode: 'replyall', folder: m.folder, uid: m.uid }) },
       { label: 'Forward', run: () => startCompose({ mode: 'forward', folder: m.folder, uid: m.uid }) },
       { divider: true },
-      { label: 'Archive', run: () => actArchive([m]) },
+      role === 'trash' ? { label: 'Restore to Inbox', run: () => actRestore([m]) } : role === 'archive' ? { label: 'Unarchive', run: () => actRestore([m]) } : { label: 'Archive', run: () => actArchive([m]) },
       { label: 'Move to…', run: () => actMove([m]) },
       { label: role === 'junk' ? 'Not spam' : 'Mark as spam', run: () => actSpam([m]) },
       { label: 'Delete', danger: true, run: () => actDelete([m]) },

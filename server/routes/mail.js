@@ -6,12 +6,9 @@ const smtp = require('../services/mail-smtp');
 const mailSettings = require('../services/mail-settings');
 const { verifyToken } = require('../middleware/auth');
 const { parseFilters } = require('../services/search-query');
-const identities = require('../services/identities');
 const translateService = require('../services/translate');
-const calendar = require('../services/calendar');
 const displayName = require('../services/display-name');
 const folderNames = require('../services/folder-names');
-const { allowedEmail } = require('../services/account-profiles');
 
 const router = express.Router();
 const sendGuard = require('../services/send-guard');
@@ -299,7 +296,7 @@ router.post('/send', receiveMessage, async (req, res) => {
     const attachments = await gatherAttachments(req, creds);
 
     const settings = await mailSettings.getSettings(req.user.email);
-    const from = identities.resolve(settings.identities, body.fromAddress, { name: displayName.forPerson(req.user.email, settings.displayName), address: req.user.email });
+    const from = { name: displayName.forPerson(req.user.email, settings.displayName), address: req.user.email };
     const outgoing = {
       fromName: from.name,
       fromAddress: from.address,
@@ -345,7 +342,7 @@ router.post('/draft', receiveMessage, async (req, res) => {
     const body = req.body || {};
     const attachments = await gatherAttachments(req, creds);
     const settings = await mailSettings.getSettings(req.user.email);
-    const from = identities.resolve(settings.identities, body.fromAddress, { name: displayName.forPerson(req.user.email, settings.displayName), address: req.user.email });
+    const from = { name: displayName.forPerson(req.user.email, settings.displayName), address: req.user.email };
     const saved = await smtp.saveDraft(creds, {
       fromName: from.name,
       fromAddress: from.address,
@@ -387,29 +384,6 @@ router.get('/messages/:uid/invitation/:index', withMailbox(async (req,creds) => 
  const file=await imap.readAttachment(creds,{folder:folderParam(req.query.folder),uid:uidParam(req.params.uid),index:Number(req.params.index)});
  return invitations.inspect(file.content,req.user.email);
 }));
-// ---- calendar: events live per person on the server; invitations are added only on request
-const eventId = (value) => {
-  if (!/^[0-9a-f]{24}$/.test(String(value))) throw Object.assign(new Error('Event not found.'), { status: 404 });
-  return String(value);
-};
-const calendarRoute = (handler) => async (req, res) => {
-  try { await handler(req, res); } catch (err) { sendError(res, err); }
-};
-router.get('/calendar/events', calendarRoute(async (req, res) => res.json({ events: await calendar.list(req.user.email, String(req.query.from || ''), String(req.query.to || '')) })));
-router.post('/calendar/events', calendarRoute(async (req, res) => res.json(await calendar.create(req.user.email, req.body || {}))));
-router.get('/calendar/events/:id', calendarRoute(async (req, res) => res.json(await calendar.details(req.user.email, eventId(req.params.id)))));
-router.delete('/calendar/events/:id', calendarRoute(async (req, res) => res.json(await calendar.remove(req.user.email, eventId(req.params.id)))));
-router.get('/calendar/export.ics', calendarRoute(async (req, res) => {
-  res.set('Content-Type', 'text/calendar; charset=utf-8');
-  res.set('Content-Disposition', dispositionHeader('calendar.ics', 'attachment'));
-  res.set('X-Content-Type-Options', 'nosniff');
-  res.set('Cache-Control', 'private, no-store');
-  res.send(await calendar.exportIcs(req.user.email));
-}));
-router.post('/messages/:uid/invitation/:index/calendar', withMailbox(async (req, creds) => {
-  const file = await imap.readAttachment(creds, { folder: folderParam(req.body.folder), uid: uidParam(req.params.uid), index: Number(req.params.index) });
-  return calendar.addInvitation(req.user.email, file.content);
-}));
 router.post('/messages/:uid/invitation/:index/reply', withMailbox(async (req,creds) => {
  const file=await imap.readAttachment(creds,{folder:folderParam(req.body.folder),uid:uidParam(req.params.uid),index:Number(req.params.index)});
  return invitations.reply(file.content,req.user.email,req.body.response);
@@ -446,38 +420,6 @@ router.post('/translate', async (req, res) => {
   if (translateUse.size > 5000) translateUse.delete(translateUse.keys().next().value);
   try {
     res.json(await translateService.translateTexts(config, (req.body || {}).texts));
-  } catch (err) {
-    sendError(res, err);
-  }
-});
-
-// What the settings dialog and the compose window need to know about the sender.
-function senderView(email, settings) {
-  return {
-    own: { name: displayName.forPerson(email, settings.displayName), address: email },
-    identities: settings.identities || [],
-    displayName: settings.displayName || '',
-    suggested: displayName.fromEmail(email),
-  };
-}
-
-router.get('/identities', async (req, res) => {
-  try {
-    res.json(senderView(req.user.email, await mailSettings.getSettings(req.user.email)));
-  } catch (err) {
-    sendError(res, err);
-  }
-});
-
-router.put('/identities', async (req, res) => {
-  try {
-    const body = req.body || {};
-    const { identities: clean } = identities.sanitize(body.identities, { ownAddress: req.user.email, isAllowed: allowedEmail });
-    const name = body.displayName === undefined ? undefined : displayName.clean(body.displayName);
-    const view = senderView(req.user.email, await mailSettings.saveIdentities(req.user.email, clean, name));
-    // Menus show the name from the session, so keep it current (the TU-ID stands in when there is no name).
-    if (res.locals.session && res.locals.session.user) res.locals.session.user.name = view.own.name || req.user.username;
-    res.json(view);
   } catch (err) {
     sendError(res, err);
   }

@@ -1,14 +1,14 @@
 // Offline shell for the installed app. It stores only the static page files; anything under /api/ and
 // every non-GET request goes straight to the network, so no mail, session or user data is ever cached.
-const CACHE = 'tu-mail-shell-v2';
+const CACHE = 'tu-mail-shell-v6';
 const SHELL = [
-  '/', '/index.html', '/mail.html', '/calendar.html', '/manifest.webmanifest',
+  '/', '/index.html', '/mail.html', '/manifest.webmanifest',
   '/css/login.css', '/css/main.css', '/css/dashboard.css', '/css/mobile.css', '/css/mail.css', '/css/mail-compose.css',
-  '/css/mail-cards.css', '/css/features.css', '/css/calendar.css', '/css/standalone.css', '/css/a11y.css', '/css/modern.css', '/css/print.css',
+  '/css/mail-cards.css', '/css/features.css', '/css/standalone.css', '/css/a11y.css', '/css/modern.css', '/css/print.css',
   '/js/i18n.js', '/js/i18n-de.js', '/js/brand.js', '/js/pwa.js', '/js/ui-prefs.js', '/js/a11y.js', '/js/shortcuts.js',
   '/js/login.js', '/js/auth.js', '/js/mail-app.js', '/js/mail-cache.js', '/js/mail-thread.js', '/js/mail-preview.js',
   '/js/mail-organize.js', '/js/mail-recovery.js', '/js/mail-compose.js', '/js/mail-signature.js', '/js/mail-tools.js',
-  '/js/mail-search.js', '/js/safety.js', '/js/undo-send.js', '/js/reminders.js', '/js/identities.js', '/js/message-tools.js', '/js/notify.js', '/js/calendar.js',
+  '/js/mail-search.js', '/js/safety.js', '/js/undo-send.js', '/js/message-tools.js', '/js/notify.js',
   '/assets/tu-logo.svg', '/assets/icon.svg', '/assets/icon-192.png',
 ];
 

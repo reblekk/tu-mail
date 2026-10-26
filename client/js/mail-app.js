@@ -657,6 +657,24 @@ window.markMessageAnswered = (folder, uid) => {
 };
 
 $('msg-back').addEventListener('click', backToList);
+// Swipe right on the message heading (or anywhere on the message while a phone shows it full screen) to go back.
+(function () {
+  const pane = $('mail-read-pane');
+  let start = null;
+  pane.addEventListener('touchstart', (e) => {
+    const t = e.touches[0];
+    start = e.touches.length === 1 && window.matchMedia('(max-width: 899px)').matches ? { x: t.clientX, y: t.clientY, heading: !!e.target.closest('.msg-toolbar') } : null;
+  }, { passive: true });
+  pane.addEventListener('touchend', (e) => {
+    if (!start) return;
+    const t = e.changedTouches[0], dx = t.clientX - start.x, dy = Math.abs(t.clientY - start.y);
+    const fromEdge = start.x < 40;
+    const long = dx > 70 && dy < 45 && dx > dy * 2;
+    if (long && (start.heading || fromEdge) && state.uid !== null && !document.querySelector('dialog[open], .cmp-dialog-overlay')) backToList();
+    start = null;
+  }, { passive: true });
+  pane.addEventListener('touchcancel', () => { start = null; }, { passive: true });
+})();
 function backToList() {
   if (state.pushedOpen) {
     state.pushedOpen = false;
