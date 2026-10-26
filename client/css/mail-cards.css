@@ -276,3 +276,5 @@
 .att-note p { margin: 6px 0; }
 .att-open { overflow: hidden; }
 @media (max-width: 899px) { .att-bar { padding: 8px 10px; } .att-stage { padding: 0 8px 8px; } }
+
+.mail-menu { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }

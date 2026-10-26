@@ -460,6 +460,11 @@
       suppressClickUntil = openedAt + 900;
       if (navigator.vibrate) { try { navigator.vibrate(12); } catch (e) { /* not supported */ } }
       openPopupMenu(anchor, menu);
+      // Android also starts its own text selection on a long press; the word under the finger is now in the menu.
+      const noSelect = (e) => e.preventDefault();
+      document.addEventListener('selectstart', noSelect, true);
+      setTimeout(() => document.removeEventListener('selectstart', noSelect, true), 1500);
+      try { window.getSelection().removeAllRanges(); } catch (e) { /* nothing to clear */ }
     }
 
     list.addEventListener('pointerdown', (e) => {
