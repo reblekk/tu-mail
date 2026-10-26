@@ -275,6 +275,7 @@
     'These copies are stored on this browser, including locally added attachments. They remain until sent or removed here.': 'Diese Kopien sind in diesem Browser gespeichert, auch lokal hinzugefügte Anhänge. Sie bleiben, bis sie gesendet oder hier entfernt werden.',
     'No recovered drafts.': 'Keine wiederhergestellten Entwürfe.',
     'Restore': 'Wiederherstellen',
+    'Delete permanently': 'Endgültig löschen',
     'Unarchive': 'Aus dem Archiv holen',
     'Move back to Inbox (E)': 'Zurück in den Posteingang (E)',
     'Remove local copy': 'Lokale Kopie entfernen',

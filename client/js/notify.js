@@ -31,7 +31,38 @@
   let last = -1; // newest message number already announced (or present when we started)
   let timer = null;
 
+  // Background alerts: the browser's push subscription lives on the server, which watches the Inbox and sends the alert
+  // (even with the tab closed or the phone locked). While that works, this tab does not announce mail itself.
+  let pushOn = false;
+  const pushSupported = () => 'serviceWorker' in navigator && 'PushManager' in root && 'Notification' in root;
+  const keyBytes = (b64) => { const raw = atob(b64.replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from(raw, (c) => c.charCodeAt(0)); };
+  async function subscribePush() {
+    if (!pushSupported() || Notification.permission !== 'granted') return false;
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      const { key } = await mailFetch('/api/mail/push/key');
+      const options = { userVisibleOnly: true, applicationServerKey: keyBytes(key) };
+      let sub = await reg.pushManager.getSubscription();
+      if (!sub) sub = await reg.pushManager.subscribe(options);
+      try { await mailFetch('/api/mail/push/subscribe', { method: 'POST', body: JSON.stringify({ subscription: sub.toJSON() }) }); }
+      catch (err) { await sub.unsubscribe(); sub = await reg.pushManager.subscribe(options); await mailFetch('/api/mail/push/subscribe', { method: 'POST', body: JSON.stringify({ subscription: sub.toJSON() }) }); }
+      return true;
+    } catch (e) { return false; }
+  }
+  async function unsubscribePush() {
+    pushOn = false;
+    if (!pushSupported()) return;
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.getSubscription();
+      if (!sub) return;
+      await mailFetch('/api/mail/push/unsubscribe', { method: 'POST', body: JSON.stringify({ endpoint: sub.endpoint }) }).catch(() => {});
+      await sub.unsubscribe();
+    } catch (e) { /* nothing more to undo */ }
+  }
+
   async function poll() {
+    if (pushOn) return;
     if (mode === 'off' || !('Notification' in root) || Notification.permission !== 'granted') return;
     try {
       const data = await mailFetch('/api/mail/unread?since=0' + (last >= 0 ? '&after=' + last : ''));
@@ -59,6 +90,7 @@
     mode = wanted;
     save(mode);
     last = -1;
+    if (mode === 'off') await unsubscribePush(); else pushOn = await subscribePush();
     schedule();
     root.dispatchEvent(new Event('tu-notify-changed'));
     return label();
@@ -97,6 +129,6 @@
   }
 
   root.MailNotify = { label, cycle, set, describe, next, shouldPrompt };
-  setTimeout(schedule, 3000);
+  setTimeout(async () => { if (mode !== 'off') pushOn = await subscribePush(); schedule(); }, 3000);
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', maybePrompt); else maybePrompt();
 })(typeof window !== 'undefined' ? window : globalThis);

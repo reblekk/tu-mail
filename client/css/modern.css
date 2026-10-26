@@ -339,3 +339,7 @@ footer { border-top: 0; color: var(--text-faint); }
   .mail-main .page-title .tu-header-logo { width: 124px; height: 45px; }
   .mail-main .phone-title, .mail-main .page-title h2 { font-size: 16px; max-width: calc(50vw - 132px); }
 }
+
+/* Touch: taps register at once (no double-tap-zoom wait), without the grey flash, and the list does not select text. */
+html { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.mail-item { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }

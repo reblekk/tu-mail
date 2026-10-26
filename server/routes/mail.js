@@ -1,6 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const mailSession = require('../services/mail-session');
+const push = require('../services/push');
 const imap = require('../services/mail-imap');
 const smtp = require('../services/mail-smtp');
 const mailSettings = require('../services/mail-settings');
@@ -154,6 +155,14 @@ router.post('/disconnect', (req, res) => {
 
 router.get('/folders', withMailbox(async (req, creds) => folderNames.tidy(await imap.listFolders(creds))));
 
+// Alerts while the browser is closed: the browser's push subscription is kept on the server (services/push.js).
+router.get('/push/key', (req, res) => res.json({ key: push.publicKey() }));
+router.post('/push/subscribe', (req, res) => {
+  try { push.add(req.user.email, (req.body || {}).subscription); res.json({ ok: true }); } catch (err) { sendError(res, err); }
+});
+router.post('/push/unsubscribe', (req, res) => {
+  try { push.remove(req.user.email, String((req.body || {}).endpoint || '')); res.json({ ok: true }); } catch (err) { sendError(res, err); }
+});
 router.get('/unread', withMailbox((req, creds) => imap.inboxCounts(creds, Math.max(0, parseInt(req.query.since, 10) || 0), (req.query.after === undefined ? -1 : Math.max(0, parseInt(req.query.after, 10) || 0)))));
 
 router.get('/messages', withMailbox((req, creds) => {

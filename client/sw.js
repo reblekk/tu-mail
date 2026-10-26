@@ -1,6 +1,6 @@
 // Offline shell for the installed app. It stores only the static page files; anything under /api/ and
 // every non-GET request goes straight to the network, so no mail, session or user data is ever cached.
-const CACHE = 'tu-mail-shell-v6';
+const CACHE = 'tu-mail-shell-v7';
 const SHELL = [
   '/', '/index.html', '/mail.html', '/manifest.webmanifest',
   '/css/login.css', '/css/main.css', '/css/dashboard.css', '/css/mobile.css', '/css/mail.css', '/css/mail-compose.css',
@@ -18,6 +18,36 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim()));
+});
+
+// Alerts from the server (services/push.js) arrive here even when no page is open. If the person is looking at
+// the app there is nothing to announce, so nothing is shown.
+self.addEventListener('push', (event) => {
+  let data = {};
+  try { data = event.data.json(); } catch (e) { /* an empty ping */ }
+  event.waitUntil((async () => {
+    const pages = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    if (pages.some((p) => p.visibilityState === 'visible' && p.focused)) return;
+    await self.registration.showNotification(String(data.title || 'New mail').slice(0, 120), {
+      body: String(data.body || '').slice(0, 300), tag: 'tu-mail-new', renotify: true, icon: '/assets/icon-192.png',
+      data: { url: typeof data.url === 'string' && data.url.startsWith('/mail.html') ? data.url : '/mail.html' },
+    });
+  })());
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = (event.notification.data && event.notification.data.url) || '/mail.html';
+  event.waitUntil((async () => {
+    const pages = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const page of pages) {
+      if (!('focus' in page)) continue;
+      await page.focus();
+      if ('navigate' in page) { try { await page.navigate(url); } catch (e) { /* stays where it is */ } }
+      return;
+    }
+    await self.clients.openWindow(url);
+  })());
 });
 
 self.addEventListener('fetch', (event) => {

@@ -2,9 +2,9 @@
 
 Open-source webmail client for TU Darmstadt mailboxes (MIT). It talks to the university's IMAP and SMTP servers on the user's behalf. It can run on one machine for one person, or be deployed by an operator (for example the HRZ) for many users.
 
-Features: folders, search, threads, compose/reply/forward, attachments, drafts, move/archive/delete, meeting invitations (read and answer), contacts and signatures. Mail actions operate on the real mailbox after sign-in. Background push notifications are not included.
+Features: folders, search, threads, compose/reply/forward, attachments, drafts, move/archive/delete, meeting invitations (read and answer), contacts and signatures. Mail actions operate on the real mailbox after sign-in. 
 
-Notifications: optional desktop notifications for new mail while a Mail tab is open (the alert shows the sender and the subject), chosen per browser. While they are off, the Mail page asks once after each sign-in whether to turn them on (Allow or Not now).
+Notifications: optional alerts for new mail, even when the tab is closed or the phone is locked (Web Push: the server checks the Inbox every 90 seconds for people who turned them on, and sends the sender and subject, encrypted for their browser; `PUSH=off` disables it; on an iPhone the app must first be added to the Home Screen) (the alert shows the sender and the subject), chosen per browser. While they are off, the Mail page asks once after each sign-in whether to turn them on (Allow or Not now).
 
 Mail tools: search filters (sender, recipient, subject, date range, attachment, flagged) with saved searches, undo send (off by default; a cancellable pause of 5 to 30 seconds before a message is submitted), phishing hints (look-alike sender domains, mismatched or disguised links, display-name tricks, different reply-to), export of a message as `.eml`, and translation of a message to English. Saved searches and the undo delay are stored in the browser, per account; nothing about them is kept on the server.
 

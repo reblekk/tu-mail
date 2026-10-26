@@ -100,7 +100,19 @@ function getCredentials(req) {
 }
 function setCredentials(req, res, { password }) { const account = selected(req, lookup(req)); if (account) { account.password = password; persist(); } }
 function clearCredentials(res) { if (res.locals.session) { res.locals.session.password = null; persist(); } }
+// Every signed-in mailbox the server still holds a password for (the background alert check uses these).
+function allCredentials() {
+  const seen = new Set(), out = [];
+  for (const session of sessions.values()) {
+    if (session.expires <= Date.now()) continue;
+    for (const account of session.accounts.values()) {
+      const email = String(account.user.email || '').toLowerCase();
+      if (account.password && email && !seen.has(email)) { seen.add(email); out.push({ ...account.user, password: account.password }); }
+    }
+  }
+  return out;
+}
 function listAccounts(req) { return [...(lookup(req)?.accounts.values() || [])].map(a => a.user); }
 function logout(req, res) { sessions.delete(id(req)); res.clearCookie('tu_mail_session', { path: '/' }); persist(); }
 setInterval(sweep, 60000).unref();
-module.exports = { configure, count, create, verifyToken, getCredentials, setCredentials, clearCredentials, listAccounts, logout };
+module.exports = { configure, count, create, verifyToken, getCredentials, setCredentials, clearCredentials, listAccounts, logout, allCredentials };

@@ -419,6 +419,72 @@
     folderMenu(more.dataset.path, more);
   }, true);
 
+  // ------------------------------------------------------------------ long press / right-click on a row
+
+  // Hold a message (touch) or right-click it (mouse) for everything that can be done with it.
+  (function () {
+    const list = $('mail-list');
+    let timer = null, origin = null, openedAt = 0, suppressClickUntil = 0;
+    const cancel = () => { clearTimeout(timer); timer = null; origin = null; };
+
+    function openRowMenu(li, x, y) {
+      const uid = Number(li.dataset.uid);
+      const row = state.messages.find((m) => m.uid === uid);
+      if (!row) return;
+      const items = [{ folder: state.folder, uid }];
+      const kind = (currentFolder() || {}).role;
+      const anchor = { getBoundingClientRect: () => ({ left: x, right: x, top: y, bottom: y }) };
+      const menu = [];
+      if (kind !== 'drafts') {
+        menu.push(
+          { label: row.seen ? 'Mark as unread' : 'Mark as read', run: () => setFlag([uid], row.seen ? 'unread' : 'read') },
+          { label: row.flagged ? 'Remove flag' : 'Flag', run: () => setFlag([uid], 'star') },
+          { divider: true },
+          { label: 'Reply', run: () => startCompose({ mode: 'reply', folder: state.folder, uid }) },
+          { label: 'Reply all', run: () => startCompose({ mode: 'replyall', folder: state.folder, uid }) },
+          { label: 'Forward', run: () => startCompose({ mode: 'forward', folder: state.folder, uid }) },
+          { divider: true },
+          kind === 'trash' ? { label: 'Restore to Inbox', run: () => actRestore(expandToConversation(items)) }
+            : kind === 'archive' ? { label: 'Unarchive', run: () => actRestore(expandToConversation(items)) }
+            : { label: 'Archive', run: () => actArchive(expandToConversation(items)) },
+          { label: 'Move to…', run: () => actMove(expandToConversation(items)) },
+          { label: kind === 'junk' ? 'Not spam' : 'Mark as spam', run: () => actSpam(expandToConversation(items)) },
+        );
+      }
+      menu.push(
+        { label: kind === 'trash' ? 'Delete permanently' : 'Delete', danger: true, run: () => actDelete(expandToConversation(items)) },
+        { divider: true },
+        { label: 'Select', run: () => { setSelecting(true); toggleSelect(uid); } },
+      );
+      openedAt = Date.now();
+      suppressClickUntil = openedAt + 900;
+      if (navigator.vibrate) { try { navigator.vibrate(12); } catch (e) { /* not supported */ } }
+      openPopupMenu(anchor, menu);
+    }
+
+    list.addEventListener('pointerdown', (e) => {
+      cancel();
+      if (e.pointerType === 'mouse' || e.button > 0 || state.selecting) return;
+      const li = e.target.closest('.mail-item');
+      if (!li || e.target.closest('[data-sel], [data-flag]')) return;
+      origin = { x: e.clientX, y: e.clientY };
+      timer = setTimeout(() => { const at = origin; cancel(); if (at) openRowMenu(li, at.x, at.y); }, 480);
+    });
+    list.addEventListener('pointermove', (e) => { if (origin && Math.hypot(e.clientX - origin.x, e.clientY - origin.y) > 10) cancel(); });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach((ev) => list.addEventListener(ev, cancel));
+    $('mail-list-scroll').addEventListener('scroll', cancel, { passive: true });
+    list.addEventListener('contextmenu', (e) => {
+      const li = e.target.closest('.mail-item');
+      if (!li) return;
+      e.preventDefault();
+      if (Date.now() - openedAt < 900) return;
+      cancel();
+      openRowMenu(li, e.clientX, e.clientY);
+    });
+    // The lift of the finger after a long press must not also open the message.
+    list.addEventListener('click', (e) => { if (Date.now() < suppressClickUntil) { e.preventDefault(); e.stopPropagation(); } }, true);
+  })();
+
   // ------------------------------------------------------------------ keyboard
 
   document.addEventListener('keydown', (e) => {

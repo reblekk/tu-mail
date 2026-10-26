@@ -29,10 +29,17 @@ window.TuOutside=(function(){
   const parts=keep||(typeof inside==='function'?[]:[inside]);
   const contains=typeof inside==='function'?inside:(t=>inside.contains(t));
   const thaw=freeze(parts);
-  const down=e=>{if(contains(e.target))return;swallowUntil=Date.now()+700;close();};
+  // If the pop-up vanished without telling us, never leave the page frozen.
+  let stopped=false;
+  const stop=()=>{if(stopped)return;stopped=true;thaw();document.removeEventListener('pointerdown',down,true);document.removeEventListener('keydown',key,true);};
+  const down=e=>{
+   if(parts.length&&!parts.some(el=>el.isConnected&&!el.hidden&&el.getClientRects().length)){stop();return;}
+   if(contains(e.target))return;
+   swallowUntil=Date.now()+700;close();
+  };
   const key=e=>{if(e.key==='Escape')close();};
   document.addEventListener('pointerdown',down,true);document.addEventListener('keydown',key,true);
-  return()=>{thaw();document.removeEventListener('pointerdown',down,true);document.removeEventListener('keydown',key,true);};
+  return stop;
  }};
 })();
 function getToken(){return '';}

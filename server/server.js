@@ -14,6 +14,7 @@ const metricsModule = require('./middleware/metrics');
 const brandModule = require('./services/brand');
 const mailSettings = require('./services/mail-settings');
 const displayName = require('./services/display-name');
+const push = require('./services/push');
 
 function createApp(config = configModule.load()) {
   const app = express();
@@ -85,7 +86,7 @@ function createApp(config = configModule.load()) {
   app.get('/api/auth/me', session.verifyToken, (req, res) => res.json({ user: req.user }));
   app.get('/api/auth/accounts', session.verifyToken, (req, res) => res.json({ accounts: session.listAccounts(req) }));
   app.post('/api/auth/logout', session.verifyToken, (req, res) => {
-    for (const account of session.listAccounts(req)) imap.forget(account.email);
+    for (const account of session.listAccounts(req)) { imap.forget(account.email); push.clear(account.email); }
     session.logout(req, res);
     res.json({ ok: true });
   });
@@ -130,6 +131,14 @@ if (require.main === module) {
     const where = config.publicUrl ? config.publicUrl.origin : 'http://127.0.0.1:' + config.port;
     console.log('TUDa Mail: ' + where + ' (listening on ' + config.bindHost + ':' + config.port + ')');
   });
+  // Alerts for new mail while the browser is closed (see services/push.js). PUSH=off turns the background check off.
+  if (process.env.PUSH !== 'off') {
+    push.start({
+      credentials: session.allCredentials,
+      inboxCounts: imap.inboxCounts,
+      log: (event, fields) => console.log(JSON.stringify({ time: new Date().toISOString(), event, ...fields })),
+    });
+  }
   // Finish in-flight requests, then exit; sessions are memory-only so nothing else needs saving.
   for (const signal of ['SIGTERM', 'SIGINT']) process.on(signal, () => server.close(() => process.exit(0)));
 }
