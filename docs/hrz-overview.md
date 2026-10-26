@@ -1,10 +1,10 @@
-# TUDa Mail: overview for HRZ
+# TUDa Mail: technical overview
 
 TUDa Mail is an open-source (MIT) web interface for TU Darmstadt mailboxes. It does not replace any HRZ service: it connects to the existing IMAP and SMTP servers with the user's own TU-ID and password, the same way any mail client does. Source: https://github.com/reblekk/tu-mail
 
 ## What users get
 
-Folders, search, conversation threads, compose, reply and forward, attachments, drafts, move, archive and delete, calendar-invitation replies, contacts and signatures, in a responsive browser interface.
+Folders, search, conversation threads, compose, reply and forward, attachments, drafts, move, archive and delete, meeting-invitation replies, contacts and signatures, new-mail alerts on phones and computers, in a responsive browser interface.
 
 ## How it runs
 
@@ -16,21 +16,19 @@ Resource needs are small: the server holds only a session record per signed-in u
 
 | Data | Where | How long |
 | --- | --- | --- |
-| Mailbox password and profile | Server memory only | Up to 8 hours; removed on sign-out, expiry or restart |
-| Signature, contacts, send-as addresses | Data directory, per user | Until the user deletes them |
-| Calendar events (created by the user, or invitations they chose to add) | Data directory, per user, as iCalendar text | Until the user deletes them |
+| Mailbox password and profile | Server memory and, with `SESSION_STORE=file`, an encrypted file (AES-256-GCM) in the data directory | Until sign-out, or `SESSION_DAYS` (default 30) without a visit; each visit renews it |
+| Signature, contacts, sender name | Data directory, per user | Until the user deletes them |
+| Push subscription (only if the person turned alerts on) | Data directory | Until sign-out or the person turns alerts off |
 | Send-attempt records (message hash and delivery result, to prevent double sends) | Data directory | Small files; can be cleared by the operator |
 | Logs: time, method, path, status, duration, client address, hashed user identifier | Standard output | Operator's retention policy |
 
-Never stored or logged: passwords on disk, cookies, request bodies, query strings, folder names, message content. No analytics, tracking or third-party requests.
+Never stored or logged: passwords in plain text, cookies, request bodies, query strings, folder names, message content. No analytics, tracking or third-party requests.
 
 ## Optional features that touch data
 
 - **Translation to English** is off unless HRZ configures a translation server. Browsers that translate on the device never contact it. If configured, only the text of the message being translated goes from the server to that server.
-- **Send-as addresses** let a person write from other addresses on the university domain they have saved. Messages are still submitted through their own account.
-- **Calendar** keeps only what the person adds. Reading an invitation does not add it.
-- **Desktop notifications** work only while a Mail tab is open; the server keeps no credentials in the background. They are offered after sign-in, and the person chooses whether they show only a count or also the sender and subject.
-- **Search filters, saved searches, reminders and the undo-send delay** are stored in the user's browser only.
+- **New-mail alerts** are optional. If a person allows them, the server checks their Inbox every 90 seconds using the stored sign-in and sends the sender and subject through the browser's push service (Google, Mozilla or Apple), encrypted for that browser. Signing out removes the subscription. `PUSH=off` disables the feature.
+- **Search filters, saved searches and the undo-send delay** are stored in the user's browser only.
 
 ## Security measures
 
@@ -43,8 +41,8 @@ Never stored or logged: passwords on disk, cookies, request bodies, query string
 
 ## Known limits (stated plainly)
 
-- One instance only. Sessions live in process memory by design, so a restart signs everyone out.
-- Anyone with access to the server's memory can read the passwords of currently signed-in users. This is inherent to any webmail that logs in with the user's password; protect the host and disable core dumps.
+- One instance only. Sign-ins live in the memory of one process; with `SESSION_STORE=file` they are also saved encrypted so restarts do not sign people out.
+- Anyone with access to the server's memory, or to both the data directory and the session secret, can read the passwords of signed-in users. This is inherent to any webmail that logs in with the user's password; protect the host and disable core dumps.
 - Sign-in uses the TU-ID and password directly; there is no SSO or Shibboleth integration. IMAP password authentication would still need the password even with SSO in front.
 - Not yet tested against a production HRZ setup, and no independent security review has been done. HRZ's own review would be welcome.
 
@@ -58,4 +56,4 @@ Never stored or logged: passwords on disk, cookies, request bodies, query string
 
 ## Contact
 
-Fahim Ul Haque, fahimulczs@gmail.com
+Fahim Ul Haque, fahim.haque@stud.tu-darmstadt.de

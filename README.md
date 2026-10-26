@@ -1,10 +1,12 @@
 # TUDa Mail
 
-Open-source webmail client for TU Darmstadt mailboxes (MIT). It talks to the university's IMAP and SMTP servers on the user's behalf. It can run on one machine for one person, or be deployed by an operator (for example the HRZ) for many users.
+Open-source webmail client for TU Darmstadt mailboxes (MIT). It talks to the university's IMAP and SMTP servers on the user's behalf. It can run on one machine for one person, or be deployed by an operator for many users.
 
-Features: folders, search, threads, compose/reply/forward, attachments, drafts, move/archive/delete, meeting invitations (read and answer), contacts and signatures. Mail actions operate on the real mailbox after sign-in. 
+> **Independent project.** TUDa Mail is a private student project. It is not an official service of the Technical University of Darmstadt and is not endorsed by it.
 
-Notifications: optional alerts for new mail, even when the tab is closed or the phone is locked (Web Push: the server checks the Inbox every 90 seconds for people who turned them on, and sends the sender and subject, encrypted for their browser; `PUSH=off` disables it; on an iPhone the app must first be added to the Home Screen) (the alert shows the sender and the subject), chosen per browser. While they are off, the Mail page asks once after each sign-in whether to turn them on (Allow or Not now).
+Features: folders, search, threads, compose/reply/forward, attachments, drafts, move/archive/delete, meeting invitations (read and answer), contacts and signatures. Mail actions operate on the real mailbox after sign-in. Long-press (or right-click) a message in the list for all actions, and restore from Deleted Items or Archive.
+
+Notifications: optional alerts for new mail, even when the tab is closed or the phone is locked. This uses Web Push: for people who turned alerts on, the server checks the Inbox every 90 seconds and sends the sender and subject through the browser's push service, encrypted for that browser. Nothing is announced while the person is looking at the app. The choice is per browser; while it is off, the Mail page asks once after each sign-in (Allow or Not now). `PUSH=off` disables the background check. On an iPhone the app must first be added to the Home Screen.
 
 Mail tools: search filters (sender, recipient, subject, date range, attachment, flagged) with saved searches, undo send (off by default; a cancellable pause of 5 to 30 seconds before a message is submitted), phishing hints (look-alike sender domains, mismatched or disguised links, display-name tricks, different reply-to), export of a message as `.eml`, and translation of a message to English. Saved searches and the undo delay are stored in the browser, per account; nothing about them is kept on the server.
 
@@ -37,7 +39,12 @@ All settings are environment variables (or a `.env` file; never put passwords in
 | `MAIL_EMAIL_DOMAIN` | Only addresses on this domain (and subdomains) may sign in. Default `tu-darmstadt.de`. |
 | `MAIL_PROFILES` | JSON replacing the built-in student mailbox (`imap.stud.tu-darmstadt.de`) with other IMAP hosts. The first entry, or `student`, is used. |
 | `MAIL_IMAP_HOST`, `MAIL_IMAP_PORT`, `MAIL_SMTP_HOST`, `MAIL_SMTP_PORT`, `MAIL_*_SECURE` | Mail servers. Defaults point at TU Darmstadt student mail; both connections verify TLS certificates. |
-| `TU_MAIL_DATA_DIR` | Directory for signatures, contacts and send-attempt records. Default `./data`. |
+| `TU_MAIL_DATA_DIR` | Directory for signatures, contacts, send-attempt records, push subscriptions and (optionally) saved sign-ins. Default `./data`. |
+| `SESSION_STORE` | `memory` (default) keeps sign-ins in process memory only; `file` also saves them, encrypted, in `TU_MAIL_DATA_DIR` so a restart does not sign everyone out. |
+| `SESSION_DAYS` | How long a sign-in lasts without a visit; each visit renews it. Default 30. |
+| `SESSION_SECRET` | Key for the encrypted sign-in file (`SESSION_STORE=file`). Set a long random value; without it a key file is kept beside the data, which protects much less. |
+| `PUSH` | `off` disables the background check for new mail (Web Push alerts). |
+| `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `PUSH_CONTACT` | Web Push keys (generated and kept in `TU_MAIL_DATA_DIR/push` when unset) and the `mailto:` contact sent to push services. |
 | `LOGIN_IP_PER_MINUTE` | Login requests allowed per client address per minute. Default 10. |
 | `LOGIN_ACCOUNT_FAILURES`, `LOGIN_ACCOUNT_WINDOW_MINUTES` | Failed sign-ins allowed per mailbox inside the window. Defaults 5 and 15. |
 | `MAX_SESSIONS` | Upper bound on concurrent sessions. Default 2000. Further sign-ins get a "busy" response. |
@@ -57,6 +64,8 @@ docker run -d --name tu-mail --restart unless-stopped \
 ```
 
 The image runs as an unprivileged user, keeps its data in `/data`, and has a health check on `/api/health`.
+
+A ready-made Docker Compose and Caddy (automatic HTTPS) setup for a small server is in [`deploy/`](deploy/README.md).
 
 ### Reverse proxy
 
@@ -78,7 +87,7 @@ server {
 
 ### Run exactly one instance
 
-Sessions are kept in the memory of the server process, together with the mailbox password of each signed-in user. This is deliberate: nothing secret is written to disk or to a shared store such as Redis. The consequences are that all traffic must reach the same process (no load balancing across instances, no sticky-session workaround), and a restart signs everyone out. Users simply sign in again. Shutdown on `SIGTERM` is graceful.
+Sign-ins live in the memory of the server process, together with the mailbox password of each signed-in user. With the default `SESSION_STORE=memory` nothing secret is written to disk or to a shared store such as Redis, and a restart signs everyone out. With `SESSION_STORE=file` the sign-ins are also saved encrypted (AES-256-GCM, key from `SESSION_SECRET`) in the data directory so restarts and updates do not sign people out; the server also needs the passwords to check mail in the background for Web Push alerts. Either way all traffic must reach the same process (no load balancing across instances). Shutdown on `SIGTERM` is graceful.
 
 ### Monitoring and logs
 
@@ -86,13 +95,13 @@ Sessions are kept in the memory of the server process, together with the mailbox
 
 ## Threat model and privacy
 
-**What the server holds.** For each signed-in user: the mailbox password and profile, in process memory and, with `SESSION_STORE=file`, encrypted on disk, until sign-out or `SESSION_DAYS` (default 30) without a visit; each visit renews it. Without the file store a restart signs everyone out. On disk, under `TU_MAIL_DATA_DIR`: the user's signature, contacts and sender name, and short records that stop a retried send from submitting a message twice (a hash of the message and the delivery result, not the message itself). Mailbox content is fetched live from the university servers and is not stored by TUDa Mail; the browser keeps what it displays in page memory.
+**What the server holds.** For each signed-in user: the mailbox password and profile, in process memory and, with `SESSION_STORE=file`, encrypted on disk, until sign-out or `SESSION_DAYS` (default 30) without a visit; each visit renews it. Without the file store a restart signs everyone out. For people who turned on alerts, the server also keeps their browser's push subscription and checks their Inbox every 90 seconds using the stored sign-in; signing out deletes the subscription. On disk, under `TU_MAIL_DATA_DIR`: the user's signature, contacts and sender name, and short records that stop a retried send from submitting a message twice (a hash of the message and the delivery result, not the message itself). Mailbox content is fetched live from the university servers and is not stored by TUDa Mail; the browser keeps what it displays in page memory.
 
 **Translation and privacy.** The Translate button appears only if the browser can translate on the device (the text then never leaves the machine) or the operator configured `TRANSLATE_URL`. In the second case the text of the message being translated, and nothing else, is sent from the server to that translation server, so choose one you trust and run it inside your own network. The server limits each request (300 parts, 30,000 characters) and each person to 40 requests per 10 minutes, and does not log or keep the text.
 
 **What it defends against.** Cross-site requests (strict `SameSite` cookie, exact `Origin` check on every state-changing request), host-header tricks (single allowed host), clickjacking (`frame-ancestors 'none'`), script injection (a CSP with `script-src 'self'`, no inline scripts, sanitised HTML mail rendered in a sandboxed frame), password guessing (per-address and per-account throttling) and resource exhaustion at sign-in (session cap, 1 MB JSON limit, attachment limits). Pictures in messages are shown by default; the sender of a message with a remote picture can therefore see that it was opened, and from which address. Each person can switch this off in the account menu ("Pictures"), after which pictures load only when they click "Show pictures".
 
-**What it does not defend against.** Anyone who can read the server's memory (a root compromise, a core dump, a debugger) can read the passwords of signed-in users; protect the host accordingly and disable core dumps. A malicious reverse proxy sees credentials, as TLS ends there. Per-account throttling means someone can deliberately lock out a known address for the window; the lock covers sign-in through this service only, not the mailbox itself. The login throttles are in memory, so a restart resets them.
+**What it does not defend against.** Anyone who can read the server's memory (a root compromise, a core dump, a debugger) can read the passwords of signed-in users. With `SESSION_STORE=file`, anyone who can read both the data directory and the `SESSION_SECRET` (for example with root access to the host) can decrypt them too; keep the secret out of the data volume, protect the host, restrict SSH and disable core dumps. A malicious reverse proxy sees credentials, as TLS ends there. Per-account throttling means someone can deliberately lock out a known address for the window; the lock covers sign-in through this service only, not the mailbox itself. The login throttles are in memory, so a restart resets them.
 
 **Data protection.** The operator is the controller for the processing described above. Document it in your records of processing, inform users, and set a log retention period. The software contains no analytics, trackers or third-party requests.
 
@@ -102,7 +111,7 @@ Sessions are kept in the memory of the server process, together with the mailbox
 npm test
 ```
 
-Tests never contact a real mailbox or send mail. `server/demo.cjs` runs the interface against fake data without any mail server.
+Tests never contact a real mailbox or send mail. `server/demo.cjs` runs the interface against fake data without any mail server. `tools/load-test.js` runs a load test against a fake mail backend; `tools/connectivity-test.php` checks whether a host can reach the university mail servers.
 
 ## License
 

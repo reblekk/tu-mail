@@ -1,6 +1,17 @@
 {
   "name": "tu-mail",
   "version": "0.1.0",
+  "description": "Open-source webmail client for TU Darmstadt mailboxes",
+  "license": "MIT",
+  "author": "Fahim Ul Haque",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/reblekk/tu-mail.git"
+  },
+  "homepage": "https://tuda-mail.de",
+  "engines": {
+    "node": ">=20"
+  },
   "private": true,
   "scripts": {
     "start": "node server/server.js",
@@ -14,8 +25,8 @@
     "imapflow": "^2.4.0",
     "mailparser": "^3.9.38",
     "multer": "^2.0.2",
-    "nodemailer": "^7.0.10",
-    "sanitize-html": "2.18.0",
+    "nodemailer": "^10.2.1",
+    "sanitize-html": "2.18.1",
     "web-push": "^3.6.7"
   }
 }
