@@ -5,6 +5,11 @@ services:
   app:
     build: ..
     restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
     env_file: .env
     environment:
       TRUST_PROXY: "1"        # exactly one proxy (Caddy) in front, so client addresses are the real ones
@@ -14,6 +19,11 @@ services:
   caddy:
     image: caddy:2
     restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
     ports:
       - "80:80"
       - "443:443"

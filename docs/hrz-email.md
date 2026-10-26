@@ -24,7 +24,7 @@ Meine Fragen:
 Gern zeige ich den Quellcode und beantworte Rückfragen. Ich möchte den Dienst nur mit Ihrem Einverständnis öffentlich bewerben.
 
 Mit freundlichen Grüßen
-[[Name, Matrikelnummer, TU-Mailadresse]]
+FAHIM UL HAQUE
 
 ---
 
@@ -39,4 +39,4 @@ Questions: (1) Is running a service like this compatible with the university's I
 I am happy to share the source code and answer questions.
 
 Kind regards,
-[[Name]]
+FAHIM UL HAQUE
